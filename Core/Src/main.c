@@ -21,7 +21,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "arm_math.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -45,6 +45,7 @@ I2C_HandleTypeDef hi2c1;
 
 TIM_HandleTypeDef htim1;
 TIM_HandleTypeDef htim2;
+TIM_HandleTypeDef htim9;
 
 UART_HandleTypeDef huart1;
 UART_HandleTypeDef huart2;
@@ -52,7 +53,10 @@ UART_HandleTypeDef huart2;
 /* USER CODE BEGIN PV */
 
 int32_t QEIReadRaw;
-int8_t voltage = 0;
+float voltage = 0;
+int32_t setpoint = 0;
+
+arm_pid_instance_f32 PID = { 0 };
 
 /* USER CODE END PV */
 
@@ -65,9 +69,10 @@ static void MX_TIM1_Init(void);
 static void MX_TIM2_Init(void);
 static void MX_USART1_UART_Init(void);
 static void MX_ADC1_Init(void);
+static void MX_TIM9_Init(void);
 /* USER CODE BEGIN PFP */
 
-void motor(int8_t voltage);
+void motor(float voltage);
 
 /* USER CODE END PFP */
 
@@ -109,6 +114,7 @@ int main(void) {
 	MX_TIM2_Init();
 	MX_USART1_UART_Init();
 	MX_ADC1_Init();
+	MX_TIM9_Init();
 	/* USER CODE BEGIN 2 */
 
 	// start timer 1 in PWM for motor
@@ -118,12 +124,28 @@ int main(void) {
 	// Start timer in encoder mode
 	HAL_TIM_Encoder_Start(&htim2, TIM_CHANNEL_1 | TIM_CHANNEL_2);
 
+	// Timer 9 Timer Interrupt (1000Hz)
+	HAL_TIM_Base_Start_IT(&htim9);
+
+	// setup PID
+	PID.Kp = 0.02;
+	PID.Ki = 0;
+	PID.Kd = 0;
+	arm_pid_init_f32(&PID, 0);
+
 	/* USER CODE END 2 */
 
 	/* Infinite loop */
 	/* USER CODE BEGIN WHILE */
 	while (1) {
 		QEIReadRaw = __HAL_TIM_GET_COUNTER(&htim2);
+
+		if (abs(setpoint - QEIReadRaw) < 1) {
+			arm_pid_init_f32(&PID, 1);
+		} else {
+			arm_pid_init_f32(&PID, 0);
+		}
+		voltage = arm_pid_f32(&PID, setpoint - QEIReadRaw);
 		motor(voltage);
 		/* USER CODE END WHILE */
 
@@ -370,6 +392,41 @@ static void MX_TIM2_Init(void) {
 }
 
 /**
+ * @brief TIM9 Initialization Function
+ * @param None
+ * @retval None
+ */
+static void MX_TIM9_Init(void) {
+
+	/* USER CODE BEGIN TIM9_Init 0 */
+
+	/* USER CODE END TIM9_Init 0 */
+
+	TIM_ClockConfigTypeDef sClockSourceConfig = { 0 };
+
+	/* USER CODE BEGIN TIM9_Init 1 */
+
+	/* USER CODE END TIM9_Init 1 */
+	htim9.Instance = TIM9;
+	htim9.Init.Prescaler = 100 - 1;
+	htim9.Init.CounterMode = TIM_COUNTERMODE_UP;
+	htim9.Init.Period = 1000 - 1;
+	htim9.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+	htim9.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+	if (HAL_TIM_Base_Init(&htim9) != HAL_OK) {
+		Error_Handler();
+	}
+	sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+	if (HAL_TIM_ConfigClockSource(&htim9, &sClockSourceConfig) != HAL_OK) {
+		Error_Handler();
+	}
+	/* USER CODE BEGIN TIM9_Init 2 */
+
+	/* USER CODE END TIM9_Init 2 */
+
+}
+
+/**
  * @brief USART1 Initialization Function
  * @param None
  * @retval None
@@ -477,7 +534,7 @@ static void MX_GPIO_Init(void) {
 
 /* USER CODE BEGIN 4 */
 
-void motor(int8_t voltage) {
+void motor(float voltage) {
 	if (voltage > 0) {
 		// forward
 		if (voltage > 12.0) {
