@@ -61,10 +61,10 @@ int32_t QEIReadRaw;
 float voltage = 0;
 int32_t setpoint = 0;
 
-arm_pid_instance_f32 PID = { 0 };
-
 ModbusHandleTypedef hmodbus;
-u16u8_t registerFrame[200];
+u16u8_t registerFrame[70];
+
+int8_t heartbeat = 0;
 
 /* USER CODE END PV */
 
@@ -83,6 +83,8 @@ static void MX_TIM11_Init(void);
 /* USER CODE BEGIN PFP */
 
 void motor(float voltage);
+int32_t getRawPosition();
+void heartbeat_handler();
 
 /* USER CODE END PFP */
 
@@ -143,14 +145,8 @@ int main(void) {
 	hmodbus.huart = &huart2;
 	hmodbus.htim = &htim11;
 	hmodbus.slaveAddress = 0x15;
-	hmodbus.RegisterSize = 200;
+	hmodbus.RegisterSize = 70;
 	Modbus_init(&hmodbus, registerFrame);
-
-	// setup PID
-	PID.Kp = 0.02;
-	PID.Ki = 0;
-	PID.Kd = 0;
-	arm_pid_init_f32(&PID, 0);
 
 	/* USER CODE END 2 */
 
@@ -158,15 +154,8 @@ int main(void) {
 	/* USER CODE BEGIN WHILE */
 	while (1) {
 		Modbus_Protocal_Worker();
-		QEIReadRaw = __HAL_TIM_GET_COUNTER(&htim2);
-
-		if (abs(setpoint - QEIReadRaw) < 1) {
-			arm_pid_init_f32(&PID, 1);
-		} else {
-			arm_pid_init_f32(&PID, 0);
-		}
-		voltage = arm_pid_f32(&PID, setpoint - QEIReadRaw);
-		motor(voltage);
+		heartbeat_handler();
+		QEIReadRaw = getRawPosition();
 		/* USER CODE END WHILE */
 
 		/* USER CODE BEGIN 3 */
@@ -637,6 +626,37 @@ void motor(float voltage) {
 	}
 
 	__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, voltage * 1000.0 / 12.0);
+}
+
+int32_t getRawPosition() {
+	return __HAL_TIM_GET_COUNTER(&htim2);
+}
+
+void heartbeat_handler() {
+	static int8_t fail = 0;
+	static uint32_t timestamp = 0;
+	if (HAL_GetTick() >= timestamp) {
+		timestamp = HAL_GetTick() + 200;
+
+		// check if the base system send heartbeat
+		if (registerFrame[0].U16 == 18537) {
+			// success
+			heartbeat = 1;
+			fail = 0;
+		} else {
+			// fail, count failure
+			if (fail <= 10) {
+				fail++;
+			}
+			// if fail is too high then system is disconnected
+			if (fail > 9) {
+				heartbeat = 0;
+			}
+		}
+
+		// set heartbeat for base system to see
+		registerFrame[0].U16 = 22881;
+	}
 }
 
 /* USER CODE END 4 */
