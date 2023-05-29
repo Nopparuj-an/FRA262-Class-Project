@@ -64,7 +64,32 @@ int32_t setpoint = 0;
 ModbusHandleTypedef hmodbus;
 u16u8_t registerFrame[70];
 
-int8_t heartbeat = 0;
+// read only variables ============================================================================
+int16_t base_system_status;		// [0 set pick, 1 set place, 2 home, 3 tray mode, 4 point mode]
+int16_t goal_point_x;			// telling our system where to go
+int16_t goal_point_y;
+int16_t x_actual_position;
+int16_t x_actual_speed;
+
+// write only variable ============================================================================
+int16_t y_moving_status;		// [0 jog pick, 1 jog place, 2 home, 3 go pick, 4 go place, 5 go point]
+int16_t y_actual_position;
+int16_t y_actual_speed;
+int16_t y_actual_acceleration;
+int16_t pick_tray_origin_x;
+int16_t pick_tray_origin_y;
+int16_t pick_tray_orientation;
+int16_t place_tray_origin_x;
+int16_t place_tray_origin_y;
+int16_t place_tray_orientation;
+int16_t x_target_position;
+int16_t x_target_speed;
+int16_t x_target_acceleration_time;	// [1 100ms, 2 500ms, 3 1000ms]
+
+// read/write variables  ==========================================================================
+int16_t heartbeat = 0;				// [0 base system disconnected, 1 base system is connected]
+int16_t end_effector_status = 0;	// [0 laser on/off, 1 picking, 2 placing]
+int16_t x_moving_status;			// [0 home, 1 run, 2 jog left -, 3 jog right +]
 
 /* USER CODE END PV */
 
@@ -84,7 +109,8 @@ static void MX_TIM11_Init(void);
 
 void motor(float voltage);
 int32_t getRawPosition();
-void heartbeat_handler();
+void modbus_heartbeat_handler();
+void modbus_data_sync();
 
 /* USER CODE END PFP */
 
@@ -154,7 +180,8 @@ int main(void) {
 	/* USER CODE BEGIN WHILE */
 	while (1) {
 		Modbus_Protocal_Worker();
-		heartbeat_handler();
+		modbus_heartbeat_handler();
+		modbus_data_sync();
 		QEIReadRaw = getRawPosition();
 		/* USER CODE END WHILE */
 
@@ -632,7 +659,7 @@ int32_t getRawPosition() {
 	return __HAL_TIM_GET_COUNTER(&htim2);
 }
 
-void heartbeat_handler() {
+void modbus_heartbeat_handler() {
 	static int8_t fail = 0;
 	static uint32_t timestamp = 0;
 	if (HAL_GetTick() >= timestamp) {
@@ -645,7 +672,7 @@ void heartbeat_handler() {
 			fail = 0;
 		} else {
 			// fail, count failure
-			if (fail <= 10) {
+			if (fail < 126) {
 				fail++;
 			}
 			// if fail is too high then system is disconnected
@@ -657,6 +684,31 @@ void heartbeat_handler() {
 		// set heartbeat for base system to see
 		registerFrame[0].U16 = 22881;
 	}
+}
+
+void modbus_data_sync() {
+	// report data back to base system
+	registerFrame[0x10].U16 = y_moving_status;
+	registerFrame[0x11].U16 = y_actual_position;
+	registerFrame[0x12].U16 = y_actual_speed;
+	registerFrame[0x13].U16 = y_actual_acceleration;
+	registerFrame[0x20].U16 = pick_tray_origin_x;
+	registerFrame[0x21].U16 = pick_tray_origin_y;
+	registerFrame[0x22].U16 = pick_tray_orientation;
+	registerFrame[0x23].U16 = place_tray_origin_x;
+	registerFrame[0x24].U16 = place_tray_origin_y;
+	registerFrame[0x25].U16 = place_tray_orientation;
+	registerFrame[0x41].U16 = x_target_position;
+	registerFrame[0x42].U16 = x_target_speed;
+	registerFrame[0x43].U16 = x_target_acceleration_time;
+
+	// get data from base system
+	base_system_status = registerFrame[0x01].U16;
+	goal_point_x = registerFrame[0x30].U16;
+	goal_point_y = registerFrame[0x31].U16;
+	x_actual_position = registerFrame[0x44].U16;
+	x_actual_speed = registerFrame[0x45].U16;
+
 }
 
 /* USER CODE END 4 */
