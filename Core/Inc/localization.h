@@ -1,14 +1,7 @@
-/*
- * localization.h
- *
- *  Created on: 30 พ.ค. 2566
- *      Author: LENOVO
- */
-
 #ifndef INC_LOCALIZATION_H_
 #define INC_LOCALIZATION_H_
 
-// PRIVATE INCLUDE
+// PRIVATE INCLUDE ================================================================================
 
 #include <math.h>
 
@@ -134,5 +127,7 @@ Coordinate negateCoordinate(Coordinate coord) {
 	result.y = -coord.y;
 	return result;
 }
+
+// USER CODE END ==================================================================================
 
 #endif /* INC_LOCALIZATION_H_ */
