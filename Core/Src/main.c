@@ -88,7 +88,7 @@ int16_t x_target_acceleration_time;	// [1 100ms, 2 500ms, 3 1000ms]
 
 // read/write variables  ==========================================================================
 int16_t heartbeat = 0;				// [0 base system disconnected, 1 base system is connected]
-int16_t end_effector_status = 0;	// [0 laser on/off, 1 picking, 2 placing]
+int16_t end_effector_status;		// [0 laser on/off, 1 picking, 2 placing]
 int16_t x_moving_status;			// [0 home, 1 run, 2 jog left -, 3 jog right +]
 
 /* USER CODE END PV */
@@ -709,6 +709,33 @@ void modbus_data_sync() {
 	x_actual_position = registerFrame[0x44].U16;
 	x_actual_speed = registerFrame[0x45].U16;
 
+	// update read/write variable
+	static int16_t end_effector_status_slave_temp;
+	static int16_t end_effector_status_master_temp;
+	if (end_effector_status_master_temp != registerFrame[0x02].U16) {
+		// there is an update from master
+		end_effector_status = registerFrame[0x02].U16;
+		end_effector_status_master_temp = end_effector_status;
+		end_effector_status_slave_temp = end_effector_status;
+	} else if (end_effector_status_slave_temp != end_effector_status) {
+		// there is an update locally
+		registerFrame[0x02].U16 = end_effector_status;
+		end_effector_status_slave_temp = end_effector_status;
+		end_effector_status_master_temp = end_effector_status;
+	}
+	static int16_t x_moving_status_slave_temp;
+	static int16_t x_moving_status_master_temp;
+	if (x_moving_status_master_temp != registerFrame[0x40].U16) {
+		// there is an update from master
+		x_moving_status = registerFrame[0x40].U16;
+		x_moving_status_master_temp = x_moving_status;
+		x_moving_status_slave_temp = x_moving_status;
+	} else if (x_moving_status_slave_temp != x_moving_status) {
+		// there is an update locally
+		registerFrame[0x40].U16 = x_moving_status;
+		x_moving_status_slave_temp = x_moving_status;
+		x_moving_status_master_temp = x_moving_status;
+	}
 }
 
 /* USER CODE END 4 */
