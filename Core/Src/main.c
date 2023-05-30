@@ -25,6 +25,7 @@
 #include "math.h"
 #include "ModBusRTU.h"
 #include <stdlib.h>
+#include "localization.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -88,7 +89,7 @@ int16_t x_target_acceleration_time;	// [1 100ms, 2 500ms, 3 1000ms]
 
 // read/write variables  ==========================================================================
 int16_t heartbeat = 0;				// [0 base system disconnected, 1 base system is connected]
-int16_t end_effector_status;		// [0 laser on/off, 1 picking, 2 placing]
+int16_t end_effector_status;		// [0 laser on/off, 1 power, 2 picking, 3 placing]
 int16_t x_moving_status;			// [0 home, 1 run, 2 jog left -, 3 jog right +]
 
 /* USER CODE END PV */
@@ -703,11 +704,16 @@ void modbus_data_sync() {
 	registerFrame[0x43].U16 = x_target_acceleration_time;
 
 	// get data from base system
-	base_system_status = registerFrame[0x01].U16;
 	goal_point_x = registerFrame[0x30].U16;
 	goal_point_y = registerFrame[0x31].U16;
 	x_actual_position = registerFrame[0x44].U16;
 	x_actual_speed = registerFrame[0x45].U16;
+
+	static int16_t base_system_status_master_temp;
+	if (base_system_status_master_temp != registerFrame[0x01].U16) {
+		base_system_status = registerFrame[0x01].U16;
+		base_system_status_master_temp = base_system_status;
+	}
 
 	// update read/write variable
 	static int16_t end_effector_status_slave_temp;
