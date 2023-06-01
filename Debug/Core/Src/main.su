@@ -1,7 +1,7 @@
 ../Core/Inc/Localization.h:25:6:localize	160	static
-../Core/Inc/Localization.h:115:12:subtractCoordinates	48	static
-../Core/Inc/Localization.h:122:7:calculateNorm	24	static
-../Core/Inc/Localization.h:127:12:negateCoordinate	40	static
+../Core/Inc/Localization.h:120:12:subtractCoordinates	48	static
+../Core/Inc/Localization.h:127:7:calculateNorm	24	static
+../Core/Inc/Localization.h:132:12:negateCoordinate	40	static
 ../Core/Inc/BaseSystemModbus.h:44:6:modbus_heartbeat_handler	16	static
 ../Core/Inc/BaseSystemModbus.h:71:6:modbus_data_sync	16	static
 ../Core/Src/main.c:91:5:main	8	static

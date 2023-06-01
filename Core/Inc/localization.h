@@ -110,6 +110,11 @@ void localize(Coordinate *inputs, Coordinate *outputs, Coordinate *origin, float
 			outputs[i * 3 + j].y = origin->y + X[i] * dir * sin(angleValue) + Y[j] * cos(angleValue);
 		}
 	}
+
+	// dirty fix for angle error
+	if (dir < 0){
+		*angle = *angle - M_PI;
+	}
 }
 
 Coordinate subtractCoordinates(Coordinate coord1, Coordinate coord2) {

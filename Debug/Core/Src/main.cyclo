@@ -1,7 +1,7 @@
-Localization.h:25:6:localize	30
-Localization.h:115:12:subtractCoordinates	1
-Localization.h:122:7:calculateNorm	1
-Localization.h:127:12:negateCoordinate	1
+Localization.h:25:6:localize	31
+Localization.h:120:12:subtractCoordinates	1
+Localization.h:127:7:calculateNorm	1
+Localization.h:132:12:negateCoordinate	1
 BaseSystemModbus.h:44:6:modbus_heartbeat_handler	5
 BaseSystemModbus.h:71:6:modbus_data_sync	6
 main.c:91:5:main	1
