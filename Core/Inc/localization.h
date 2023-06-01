@@ -4,6 +4,7 @@
 // PRIVATE INCLUDE ================================================================================
 
 #include <math.h>
+#include <stdio.h>
 
 // PRIVATE TYPEDEF ================================================================================
 
@@ -80,7 +81,7 @@ void localize(Coordinate *inputs, Coordinate *outputs, Coordinate *origin, float
 			*angle = M_PI;
 		}
 	} else {
-		*angle = abs(atan(vector1.y / vector1.x));
+		*angle = fabs(atan(vector1.y / vector1.x));
 		if (vector1.x < 0 && vector1.y < 0) {
 			*angle = M_PI + *angle;
 		} else if (vector1.x < 0) {
@@ -95,6 +96,8 @@ void localize(Coordinate *inputs, Coordinate *outputs, Coordinate *origin, float
 	if (dir < 0) {
 		*angle = *angle + M_PI;
 		dir = -1.0;
+	} else {
+		dir = 1.0;
 	}
 
 	// create 9 points
