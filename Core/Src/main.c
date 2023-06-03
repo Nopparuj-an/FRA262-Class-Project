@@ -27,13 +27,15 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "arm_math.h"
-#include "math.h"
-#include "ModBusRTU.h"
+#include <stdio.h>
+#include <arm_math.h>
+#include <math.h>
 #include <stdlib.h>
+
+#include <ModBusRTU.h>
 #include <Localization.h>
 #include <BaseSystemModbus.h>
-#include <stdio.h>
+#include <MainLogic.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -67,6 +69,7 @@ float angle;
 ModbusHandleTypedef hmodbus;
 u16u8_t MBregisterFrame[70];
 MB MBvariables = { 0 };
+uint32_t modbus_count = 0;
 
 /* USER CODE END PV */
 
@@ -74,6 +77,7 @@ MB MBvariables = { 0 };
 void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
 
+void modbus_callback();
 void motor(float voltage);
 int32_t getRawPosition();
 
@@ -90,6 +94,9 @@ int32_t getRawPosition();
  */
 int main(void) {
 	/* USER CODE BEGIN 1 */
+
+	MBvariables.x_target_acceleration_time = 1;
+	MBvariables.x_target_speed = 3000;
 
 	corners[0].x = -68.0;
 	corners[0].y = 7.1;
@@ -156,6 +163,7 @@ int main(void) {
 		modbus_heartbeat_handler(MBregisterFrame, &MBvariables);
 		modbus_data_sync(MBregisterFrame, &MBvariables);
 		QEIReadRaw = getRawPosition();
+		main_logic(MBvariables);
 		/* USER CODE END WHILE */
 
 		/* USER CODE BEGIN 3 */
@@ -231,6 +239,27 @@ void motor(float voltage) {
 
 int32_t getRawPosition() {
 	return __HAL_TIM_GET_COUNTER(&htim2);
+}
+
+void modbus_callback() {
+	modbus_count++;
+
+	static int8_t flip = 3;
+	if (flip == 3 && MBvariables.x_moving_status == 1) {
+		flip = 2;
+	}
+	if (flip == 2 && MBvariables.x_moving_status == 0) {
+		flip = 0;
+	}
+	if (modbus_count % 4 == 0 || modbus_count % 4 == 1) {
+		if (flip == 0) {
+			MBvariables.x_moving_status = 2;
+			flip = 1;
+		} else if (flip == 1) {
+			MBvariables.x_moving_status = 0;
+			flip = 0;
+		}
+	}
 }
 
 /* USER CODE END 4 */
