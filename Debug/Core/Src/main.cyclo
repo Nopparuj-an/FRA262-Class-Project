@@ -1,3 +1,5 @@
+MotorEncoder.h:9:6:motor	5
+MotorEncoder.h:31:9:getRawPosition	1
 Localization.h:25:6:localize	31
 Localization.h:120:12:subtractCoordinates	1
 Localization.h:127:7:calculateNorm	1
@@ -7,9 +9,7 @@ BaseSystemModbus.h:73:6:modbus_data_sync	6
 MainLogic.h:18:6:main_logic	1
 MainLogic.h:22:6:end_effector_handler	3
 MainLogic.h:42:6:end_effector_gripper	3
-main.c:95:5:main	1
+main.c:94:5:main	1
 main.c:178:6:SystemClock_Config	3
-main.c:218:6:motor	5
-main.c:240:9:getRawPosition	1
-main.c:244:6:modbus_callback	1
-main.c:273:6:Error_Handler	1
+main.c:218:6:modbus_callback	1
+main.c:247:6:Error_Handler	1

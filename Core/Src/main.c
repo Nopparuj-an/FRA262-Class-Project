@@ -33,6 +33,7 @@
 #include <stdlib.h>
 
 #include <ModBusRTU.h>
+#include <MotorEncoder.h>
 #include <Localization.h>
 #include <BaseSystemModbus.h>
 #include <MainLogic.h>
@@ -78,8 +79,6 @@ void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
 
 void modbus_callback();
-void motor(float voltage);
-int32_t getRawPosition();
 
 /* USER CODE END PFP */
 
@@ -163,6 +162,7 @@ int main(void) {
 		modbus_heartbeat_handler(MBregisterFrame, &MBvariables);
 		modbus_data_sync(MBregisterFrame, &MBvariables);
 		QEIReadRaw = getRawPosition();
+		motor(voltage);
 		main_logic(MBvariables);
 		/* USER CODE END WHILE */
 
@@ -214,32 +214,6 @@ void SystemClock_Config(void) {
 }
 
 /* USER CODE BEGIN 4 */
-
-void motor(float voltage) {
-	if (voltage > 0) {
-		// forward
-		if (voltage > 12.0) {
-			voltage = 12.0;
-		}
-		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_11, RESET);
-	} else if (voltage < 0) {
-		// backward
-		voltage *= -1.0;
-		if (voltage > 12.0) {
-			voltage = 12.0;
-		}
-		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_11, SET);
-	} else {
-		// stop
-		voltage = 0;
-	}
-
-	__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, voltage * 25000.0 / 12.0);
-}
-
-int32_t getRawPosition() {
-	return __HAL_TIM_GET_COUNTER(&htim2);
-}
 
 void modbus_callback() {
 	return; // not implemented yet
