@@ -242,6 +242,7 @@ int32_t getRawPosition() {
 }
 
 void modbus_callback() {
+	return; // not implemented yet
 	modbus_count++;
 
 	static int8_t flip = 3;
@@ -251,7 +252,8 @@ void modbus_callback() {
 	if (flip == 2 && MBvariables.x_moving_status == 0) {
 		flip = 0;
 	}
-	if (modbus_count % 4 == 0 || modbus_count % 4 == 1) {
+//	if (modbus_count % 4 == 0 || modbus_count % 4 == 1) {
+	if (modbus_count % 2) {
 		if (flip == 0) {
 			MBvariables.x_moving_status = 2;
 			flip = 1;
