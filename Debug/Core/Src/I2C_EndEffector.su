@@ -1,0 +1,10 @@
+../Core/Src/I2C_EndEffector.c:15:6:ENDEFF_SOFT_RESET	24	static
+../Core/Src/I2C_EndEffector.c:24:6:ENDEFF_EMERGENCY	24	static
+../Core/Src/I2C_EndEffector.c:34:6:ENDEFF_EMERGENCY_QUIT	24	static
+../Core/Src/I2C_EndEffector.c:43:6:ENDEFF_TEST_MODE	24	static
+../Core/Src/I2C_EndEffector.c:52:6:ENDEFF_TEST_MODE_QUIT	24	static
+../Core/Src/I2C_EndEffector.c:61:6:ENDEFF_GRIPPER_RUNMODE	24	static
+../Core/Src/I2C_EndEffector.c:70:6:ENDEFF_GRIPPER_IDLE	24	static
+../Core/Src/I2C_EndEffector.c:79:6:ENDEFF_GRIPPER_PICK	24	static
+../Core/Src/I2C_EndEffector.c:88:6:ENDEFF_GRIPPER_PLACE	24	static
+../Core/Src/I2C_EndEffector.c:99:6:I2C_TO_BASESYSTEM	16	static

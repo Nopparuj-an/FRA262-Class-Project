@@ -1,3 +1,4 @@
+"./Core/Src/I2C_EndEffector.o"
 "./Core/Src/ModBusRTU.o"
 "./Core/Src/adc.o"
 "./Core/Src/dma.o"

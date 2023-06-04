@@ -36,6 +36,7 @@
 #include <Localization.h>
 #include <BaseSystemModbus.h>
 #include <MainLogic.h>
+//#include <WS2812B.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -156,7 +157,7 @@ int main(void) {
 		modbus_data_sync(&MBvariables);
 		QEIReadRaw = getRawPosition();
 		motor(voltage);
-		main_logic(MBvariables);
+		main_logic(&MBvariables);
 		/* USER CODE END WHILE */
 
 		/* USER CODE BEGIN 3 */
