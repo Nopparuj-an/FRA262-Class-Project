@@ -32,7 +32,6 @@
 #include <math.h>
 #include <stdlib.h>
 
-#include <ModBusRTU.h>
 #include <MotorEncoder.h>
 #include <Localization.h>
 #include <BaseSystemModbus.h>
@@ -67,8 +66,6 @@ Coordinate place[9];
 Coordinate origin;
 float angle;
 
-ModbusHandleTypedef hmodbus;
-u16u8_t MBregisterFrame[70];
 MB MBvariables = { 0 };
 uint32_t modbus_count = 0;
 
@@ -147,11 +144,7 @@ int main(void) {
 	HAL_TIM_Base_Start_IT(&htim9);
 
 	// Initialize modbus
-	hmodbus.huart = &huart2;
-	hmodbus.htim = &htim11;
-	hmodbus.slaveAddress = 0x15;
-	hmodbus.RegisterSize = 70;
-	Modbus_init(&hmodbus, MBregisterFrame);
+	modbus_init();
 
 	/* USER CODE END 2 */
 
@@ -159,8 +152,8 @@ int main(void) {
 	/* USER CODE BEGIN WHILE */
 	while (1) {
 		Modbus_Protocal_Worker();
-		modbus_heartbeat_handler(MBregisterFrame, &MBvariables);
-		modbus_data_sync(MBregisterFrame, &MBvariables);
+		modbus_heartbeat_handler(&MBvariables);
+		modbus_data_sync(&MBvariables);
 		QEIReadRaw = getRawPosition();
 		motor(voltage);
 		main_logic(MBvariables);
