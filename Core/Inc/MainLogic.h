@@ -50,13 +50,14 @@ void main_logic(MB *variables) {
 		if (!home_status) {
 			home_status = 1;
 			PID_enable = 0;
-			voltage = -12000;
+			voltage = -13000;
 		}
 		break;
 	case MSrun:
 		break;
+	case MSpoint:
+		break;
 	}
-
 }
 
 void interrupt_logic() {

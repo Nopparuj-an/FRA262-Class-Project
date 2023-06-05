@@ -1,2 +1,2 @@
-Joystick.c:14:6:UARTInterruptConfig	1
-Joystick.c:18:6:Joystick_Received	6
+Joystick.c:12:6:UARTInterruptConfig	1
+Joystick.c:16:6:Joystick_Received	12

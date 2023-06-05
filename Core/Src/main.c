@@ -79,7 +79,7 @@ float angle;
 MB MBvariables = { 0 };
 uint32_t modbus_count = 0;
 
-int receivedByte[6] = { 0 };
+int receivedByte[4] = { 0 };
 
 /* USER CODE END PV */
 
