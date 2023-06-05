@@ -8,9 +8,15 @@
 
 // PRIVATE TYPEDEF ================================================================================
 
+enum MachineState {
+	MSidle, MSpick, MSplace, MShome, MSrun, MSpoint
+} state;
+
 // PRIVATE VARIABLE ===============================================================================
 
 uint8_t PID_enable = 1;
+uint8_t home_status = 0;
+
 float voltage;
 extern int32_t setpoint;
 extern int32_t setpointtraj;
@@ -20,25 +26,37 @@ extern float KP;
 extern float KI;
 extern float KD;
 
-uint8_t runonce = 0;
-
 // PRIVATE FUNCTION PROTOTYPE =====================================================================
 
 void main_logic(MB *variables);
 void interrupt_logic();
 void end_effector_gripper(MB *variables, uint8_t mode);	// 0 pick, 1 place
 void end_effector_laser(MB *variables, uint8_t mode);	// 0 off, 1 on
-void home();
+void home_handler();
 
 // USER CODE ======================================================================================
 
 void main_logic(MB *variables) {
 	I2C_TO_BASESYSTEM(&variables->end_effector_status, &hi2c1);
 
-	if (runonce) {
-		home();
-		runonce = 0;
+	switch (state) {
+	case MSidle:
+		break;
+	case MSpick:
+		break;
+	case MSplace:
+		break;
+	case MShome:
+		if (!home_status) {
+			home_status = 1;
+			PID_enable = 0;
+			voltage = -12000;
+		}
+		break;
+	case MSrun:
+		break;
 	}
+
 }
 
 void interrupt_logic() {
@@ -83,11 +101,18 @@ void end_effector_laser(MB *variables, uint8_t mode) {
 	}
 }
 
-void home() {
+void home_handler() {
+	if (!home_status) {
+		return;
+	}
+	motor(0);
 	homeoffset = getRawPosition();
 	setpointtraj = 0;
 	setpoint = 0;
 	Trajectory(0, 34000, 80000, &setpointtraj, &traj_velocity, &traj_acceleration, 1);
+	home_status = 0;
+	state = MSidle;
+	PID_enable = 1;
 }
 
 // USER CODE END ==================================================================================

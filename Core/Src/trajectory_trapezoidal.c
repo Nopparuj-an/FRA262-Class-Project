@@ -50,8 +50,7 @@ void Trajectory(float setpoint_now, float velocity_max, float acceleration_max, 
 	static float distance = 0;
 
 	if(homemode == 1){
-		setpoint_past = 0;
-		setpoint_now = 0;
+		setpoint_past = setpoint_now;
 		time_trajectory = 0;
 		abs_distance = 0;
 		distance = 0;

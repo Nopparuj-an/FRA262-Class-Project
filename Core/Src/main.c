@@ -39,6 +39,7 @@
 #include <BaseSystemModbus.h>
 #include <MainLogic.h>
 #include <RGB.h>
+#include <Joystick.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -77,6 +78,8 @@ float angle;
 
 MB MBvariables = { 0 };
 uint32_t modbus_count = 0;
+
+int receivedByte[6] = { 0 };
 
 /* USER CODE END PV */
 
@@ -153,6 +156,9 @@ int main(void) {
 
 	// Initialize modbus
 	modbus_init();
+
+	// Initialize UART1
+	UARTInterruptConfig();
 
 	/* USER CODE END 2 */
 
@@ -233,6 +239,18 @@ void SystemClock_Config(void) {
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 	if (htim == &htim9) {
 		interrupt_logic();
+	}
+}
+
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
+	if (huart == &huart1) {
+		Joystick_Received(&receivedByte);
+	}
+}
+
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
+	if (GPIO_Pin == GPIO_PIN_3) {
+		home_handler();
 	}
 }
 
