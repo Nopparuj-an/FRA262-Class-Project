@@ -54,8 +54,8 @@ void Trajectory(float setpoint_now, float velocity_max, float acceleration_max, 
 		time_trajectory = 0;
 		abs_distance = 0;
 		distance = 0;
-		position = 0;
-		initial_position = 0;
+		position = setpoint_now;
+		initial_position = setpoint_now;
 		return;
 	}
 

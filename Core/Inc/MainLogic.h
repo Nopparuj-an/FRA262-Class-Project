@@ -106,13 +106,14 @@ void home_handler() {
 		return;
 	}
 	motor(0);
-	homeoffset = getRawPosition();
-	setpointtraj = 0;
-	setpoint = 0;
-	Trajectory(0, 34000, 80000, &setpointtraj, &traj_velocity, &traj_acceleration, 1);
+	homeoffset = getRawPosition() + 11500;
+	setpointtraj = -11500;
+	setpoint = -11500;
+	Trajectory(setpoint, 34000, 80000, &setpointtraj, &traj_velocity, &traj_acceleration, 1);
 	home_status = 0;
-	state = MSidle;
 	PID_enable = 1;
+	state = MSidle;
+	setpoint = 0;
 }
 
 // USER CODE END ==================================================================================
