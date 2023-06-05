@@ -52,13 +52,11 @@ void Trajectory(float setpoint_now, float velocity_max, float acceleration_max, 
 	if(homemode == 1){
 		setpoint_past = 0;
 		setpoint_now = 0;
-		time_acc = 0;
-		time_const = 0;
-		time_total = 0;
 		time_trajectory = 0;
-		time_err = 0;
+		abs_distance = 0;
 		distance = 0;
 		position = 0;
+		initial_position = 0;
 		return;
 	}
 
@@ -78,7 +76,6 @@ void Trajectory(float setpoint_now, float velocity_max, float acceleration_max, 
 		} else {
 			setpoint_past = setpoint_now;
 		}
-	}
 
 	// Define pattern of trapezoidal_trajectory
 	if (abs_distance > ((velocity_max * velocity_max) / acceleration_max)) {
@@ -128,6 +125,7 @@ void Trajectory(float setpoint_now, float velocity_max, float acceleration_max, 
 
 	if (setpoint_now == position) {
 		time_trajectory = 0;
+	}
 	}
 
 	*position_out = position;
