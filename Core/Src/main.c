@@ -33,6 +33,8 @@
 #include <stdlib.h>
 
 #include <MotorEncoder.h>
+#include <PIDControl.h>
+#include <trajectory_trapezoidal.h>
 #include <Localization.h>
 #include <BaseSystemModbus.h>
 #include <MainLogic.h>
@@ -57,9 +59,15 @@
 
 /* USER CODE BEGIN PV */
 
-int32_t QEIReadRaw;
-float voltage = 0;
+int32_t QEIReadRaw = 0;
+int32_t QEIReadHome = 0;
 int32_t setpoint = 0;
+int32_t setpointtraj = 0;
+int32_t homeoffset = 0;
+
+float KP = 114;
+float KI = 0.196;
+float KD = 500;
 
 Coordinate corners[3];
 Coordinate pick[9];
@@ -75,8 +83,6 @@ uint32_t modbus_count = 0;
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
-
-void modbus_callback();
 
 /* USER CODE END PFP */
 
@@ -156,8 +162,8 @@ int main(void) {
 		Modbus_Protocal_Worker();
 		modbus_heartbeat_handler(&MBvariables);
 		modbus_data_sync(&MBvariables);
+		QEIReadHome = getLocalPosition();
 		QEIReadRaw = getRawPosition();
-		motor(voltage);
 		main_logic(&MBvariables);
 
 		for (int i = 0; i < 60; i++) {
@@ -216,26 +222,9 @@ void SystemClock_Config(void) {
 
 /* USER CODE BEGIN 4 */
 
-void modbus_callback() {
-	return; // not implemented yet
-	modbus_count++;
-
-	static int8_t flip = 3;
-	if (flip == 3 && MBvariables.x_moving_status == 1) {
-		flip = 2;
-	}
-	if (flip == 2 && MBvariables.x_moving_status == 0) {
-		flip = 0;
-	}
-//	if (modbus_count % 4 == 0 || modbus_count % 4 == 1) {
-	if (modbus_count % 2) {
-		if (flip == 0) {
-			MBvariables.x_moving_status = 2;
-			flip = 1;
-		} else if (flip == 1) {
-			MBvariables.x_moving_status = 0;
-			flip = 0;
-		}
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
+	if (htim == &htim9) {
+		interrupt_logic();
 	}
 }
 

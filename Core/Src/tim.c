@@ -213,7 +213,7 @@ void MX_TIM9_Init(void)
 
   /* USER CODE END TIM9_Init 1 */
   htim9.Instance = TIM9;
-  htim9.Init.Prescaler = 100-1;
+  htim9.Init.Prescaler = 10-1;
   htim9.Init.CounterMode = TIM_COUNTERMODE_UP;
   htim9.Init.Period = 1000-1;
   htim9.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;

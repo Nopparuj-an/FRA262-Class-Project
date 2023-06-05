@@ -36,7 +36,8 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
  ../Core/Inc/tim.h ../Core/Inc/usart.h ../Core/Inc/gpio.h \
  ../Middlewares/Third_Party/ARM_CMSIS/CMSIS/DSP/Include/arm_math.h \
  ../Drivers/CMSIS/Include/cmsis_compiler.h ../Core/Inc/MotorEncoder.h \
- ../Core/Inc/tim.h ../Core/Inc/Localization.h \
+ ../Core/Inc/tim.h ../Core/Inc/PIDControl.h \
+ ../Core/Inc/trajectory_trapezoidal.h ../Core/Inc/Localization.h \
  ../Core/Inc/BaseSystemModbus.h ../Core/Inc/ModBusRTU.h \
  ../Core/Inc/usart.h ../Core/Inc/MainLogic.h \
  ../Core/Inc/I2C_EndEffector.h ../Core/Inc/i2c.h ../Core/Inc/WS2812B.h
@@ -85,6 +86,8 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
 ../Drivers/CMSIS/Include/cmsis_compiler.h:
 ../Core/Inc/MotorEncoder.h:
 ../Core/Inc/tim.h:
+../Core/Inc/PIDControl.h:
+../Core/Inc/trajectory_trapezoidal.h:
 ../Core/Inc/Localization.h:
 ../Core/Inc/BaseSystemModbus.h:
 ../Core/Inc/ModBusRTU.h:

@@ -287,8 +287,6 @@ void Modbus_Emission() {
 		hModbus->modbusUartStructure.MessageBufferTx[hModbus->modbusUartStructure.TxTail - 1] = CalculateCRC.U8[1];
 
 		//sent modbus
-
-		modbus_callback();
 		if (hModbus->huart->gState == HAL_UART_STATE_READY) {
 			HAL_UART_Transmit_DMA(hModbus->huart, hModbus->modbusUartStructure.MessageBufferTx, hModbus->modbusUartStructure.TxTail);
 		}
