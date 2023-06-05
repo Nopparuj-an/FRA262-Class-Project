@@ -17,7 +17,9 @@ WS2812B.h:24:6:Set_LED	1
 WS2812B.h:31:6:Set_Brightness	4
 WS2812B.h:47:6:WS2812_Send	6
 WS2812B.h:81:6:HAL_TIM_PWM_PulseFinishedCallback	2
-main.c:98:5:main	2
-main.c:185:6:SystemClock_Config	3
-main.c:225:6:HAL_TIM_PeriodElapsedCallback	2
-main.c:237:6:Error_Handler	1
+RGB.h:15:6:RGB_Rainbow	3
+RGB.h:47:10:LERP	1
+main.c:98:5:main	7
+main.c:193:6:SystemClock_Config	3
+main.c:233:6:HAL_TIM_PeriodElapsedCallback	2
+main.c:245:6:Error_Handler	1

@@ -38,7 +38,7 @@
 #include <Localization.h>
 #include <BaseSystemModbus.h>
 #include <MainLogic.h>
-#include <WS2812B.h>
+#include <RGB.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -165,12 +165,20 @@ int main(void) {
 		QEIReadHome = getLocalPosition();
 		QEIReadRaw = getRawPosition();
 		main_logic(&MBvariables);
+		RGB_Rainbow();
 
-		for (int i = 0; i < 60; i++) {
-			Set_LED(i, (i * 255.0 / 59.0), 255.0 - (i * 255.0 / 59.0), (i * 255.0 / 59.0));
+		static int8_t flip = 3;
+		if (flip == 3 && MBvariables.x_moving_status == 1) {
+			flip = 2;
 		}
-		Set_Brightness(5);
-		WS2812_Send();
+		if (flip == 2 && MBvariables.x_moving_status == 0) {
+			flip = 0;
+		}
+		if (flip == 0) {
+			if (abs(MBvariables.x_actual_position - MBvariables.x_target_position) > 1) {
+				MBvariables.x_moving_status = 2;
+			}
+		}
 		/* USER CODE END WHILE */
 
 		/* USER CODE BEGIN 3 */

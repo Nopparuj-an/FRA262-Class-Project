@@ -17,7 +17,9 @@
 ../Core/Inc/WS2812B.h:31:6:Set_Brightness	40	static
 ../Core/Inc/WS2812B.h:47:6:WS2812_Send	32	static
 ../Core/Inc/WS2812B.h:81:6:HAL_TIM_PWM_PulseFinishedCallback	16	static
-../Core/Src/main.c:98:5:main	24	static
-../Core/Src/main.c:185:6:SystemClock_Config	88	static
-../Core/Src/main.c:225:6:HAL_TIM_PeriodElapsedCallback	16	static
-../Core/Src/main.c:237:6:Error_Handler	4	static,ignoring_inline_asm
+../Core/Inc/RGB.h:15:6:RGB_Rainbow	32	static
+../Core/Inc/RGB.h:47:10:LERP	24	static
+../Core/Src/main.c:98:5:main	8	static
+../Core/Src/main.c:193:6:SystemClock_Config	88	static
+../Core/Src/main.c:233:6:HAL_TIM_PeriodElapsedCallback	16	static
+../Core/Src/main.c:245:6:Error_Handler	4	static,ignoring_inline_asm
