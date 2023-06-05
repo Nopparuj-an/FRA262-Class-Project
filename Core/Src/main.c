@@ -36,7 +36,7 @@
 #include <Localization.h>
 #include <BaseSystemModbus.h>
 #include <MainLogic.h>
-//#include <WS2812B.h>
+#include <WS2812B.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -132,6 +132,7 @@ int main(void) {
 	MX_ADC1_Init();
 	MX_TIM9_Init();
 	MX_TIM11_Init();
+	MX_TIM3_Init();
 	/* USER CODE BEGIN 2 */
 
 	// start timer 1 in PWM for motor
@@ -158,6 +159,12 @@ int main(void) {
 		QEIReadRaw = getRawPosition();
 		motor(voltage);
 		main_logic(&MBvariables);
+
+		for (int i = 0; i < 60; i++) {
+			Set_LED(i, (i * 255.0 / 59.0), 255.0 - (i * 255.0 / 59.0), (i * 255.0 / 59.0));
+		}
+		Set_Brightness(5);
+		WS2812_Send();
 		/* USER CODE END WHILE */
 
 		/* USER CODE BEGIN 3 */

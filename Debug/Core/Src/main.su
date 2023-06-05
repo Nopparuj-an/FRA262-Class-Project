@@ -10,7 +10,11 @@
 ../Core/Inc/MainLogic.h:21:6:main_logic	16	static
 ../Core/Inc/MainLogic.h:25:6:end_effector_gripper	16	static
 ../Core/Inc/MainLogic.h:39:6:end_effector_laser	16	static
-../Core/Src/main.c:92:5:main	8	static
-../Core/Src/main.c:172:6:SystemClock_Config	88	static
-../Core/Src/main.c:212:6:modbus_callback	4	static
-../Core/Src/main.c:241:6:Error_Handler	4	static,ignoring_inline_asm
+../Core/Inc/WS2812B.h:24:6:Set_LED	24	static
+../Core/Inc/WS2812B.h:31:6:Set_Brightness	40	static
+../Core/Inc/WS2812B.h:47:6:WS2812_Send	32	static
+../Core/Inc/WS2812B.h:81:6:HAL_TIM_PWM_PulseFinishedCallback	16	static
+../Core/Src/main.c:92:5:main	24	static
+../Core/Src/main.c:179:6:SystemClock_Config	88	static
+../Core/Src/main.c:219:6:modbus_callback	4	static
+../Core/Src/main.c:248:6:Error_Handler	4	static,ignoring_inline_asm

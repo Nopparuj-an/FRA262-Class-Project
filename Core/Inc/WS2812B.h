@@ -1,17 +1,18 @@
+// https://controllerstech.com/interface-ws2812-with-stm32/
+
 #ifndef INC_WS2812B_H_
 #define INC_WS2812B_H_
 
 #include "stm32f4xx_hal.h"
 
-#define MAX_LED 8
+#define MAX_LED 60
 #define USE_BRIGHTNESS 1
 
-extern TIM_HandleTypeDef htim1;
-extern volatile uint8_t datasentflag;
-volatile uint8_t datasentflag;
+extern TIM_HandleTypeDef htim3;  // Update the timer instance here
+volatile uint8_t datasentflag = 1;
 
-extern uint8_t LED_Data[MAX_LED][4];
-extern uint8_t LED_Mod[MAX_LED][4];  // for brightness
+uint8_t LED_Data[MAX_LED][4];
+uint8_t LED_Mod[MAX_LED][4];  // for brightness
 
 uint16_t pwmData[(24 * MAX_LED) + 50];
 
@@ -44,6 +45,9 @@ void Set_Brightness(int brightness)  // 0-45
 }
 
 void WS2812_Send(void) {
+	if (!datasentflag) {
+		return;
+	}
 	uint32_t indx = 0;
 	uint32_t color;
 
@@ -56,9 +60,9 @@ void WS2812_Send(void) {
 
 		for (int i = 23; i >= 0; i--) {
 			if (color & (1 << i)) {
-				pwmData[indx] = 60;  // 2/3 of 90
+				pwmData[indx] = 83;  // 2/3 of 125
 			} else {
-				pwmData[indx] = 30;  // 1/3 of 90
+				pwmData[indx] = 42;  // 1/3 of 125
 			}
 
 			indx++;
@@ -70,15 +74,15 @@ void WS2812_Send(void) {
 		indx++;
 	}
 
-	HAL_TIM_PWM_Start_DMA(&htim1, TIM_CHANNEL_1, (uint32_t*) pwmData, indx);
-	while (!datasentflag) {
-	};
+	HAL_TIM_PWM_Start_DMA(&htim3, TIM_CHANNEL_1, (uint32_t*) pwmData, indx);
 	datasentflag = 0;
 }
 
 void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *htim) {
-	HAL_TIM_PWM_Stop_DMA(&htim1, TIM_CHANNEL_1);
-	datasentflag = 1;
+	if (htim == &htim3) {
+		HAL_TIM_PWM_Stop_DMA(&htim3, TIM_CHANNEL_1);
+		datasentflag = 1;
+	}
 }
 
 #endif /* INC_WS2812B_H_ */

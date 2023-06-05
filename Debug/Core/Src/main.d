@@ -39,7 +39,7 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
  ../Core/Inc/tim.h ../Core/Inc/Localization.h \
  ../Core/Inc/BaseSystemModbus.h ../Core/Inc/ModBusRTU.h \
  ../Core/Inc/usart.h ../Core/Inc/MainLogic.h \
- ../Core/Inc/I2C_EndEffector.h ../Core/Inc/i2c.h
+ ../Core/Inc/I2C_EndEffector.h ../Core/Inc/i2c.h ../Core/Inc/WS2812B.h
 ../Core/Inc/main.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h:
 ../Core/Inc/stm32f4xx_hal_conf.h:
@@ -92,3 +92,4 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
 ../Core/Inc/MainLogic.h:
 ../Core/Inc/I2C_EndEffector.h:
 ../Core/Inc/i2c.h:
+../Core/Inc/WS2812B.h:
