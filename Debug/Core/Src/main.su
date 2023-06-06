@@ -9,11 +9,11 @@
 ../Core/Inc/BaseSystemModbus.h:61:6:modbus_heartbeat_handler	16	static
 ../Core/Inc/BaseSystemModbus.h:88:6:modbus_data_sync	16	static
 ../Core/Inc/MainLogic.h:42:6:main_logic	16	static
-../Core/Inc/MainLogic.h:76:6:interrupt_logic	16	static
-../Core/Inc/MainLogic.h:94:6:end_effector_gripper	16	static
-../Core/Inc/MainLogic.h:108:6:end_effector_laser	16	static
-../Core/Inc/MainLogic.h:118:6:home_handler	8	static
-../Core/Inc/MainLogic.h:133:6:data_report	16	static
+../Core/Inc/MainLogic.h:98:6:interrupt_logic	16	static
+../Core/Inc/MainLogic.h:116:6:end_effector_gripper	16	static
+../Core/Inc/MainLogic.h:130:6:end_effector_laser	16	static
+../Core/Inc/MainLogic.h:140:6:home_handler	8	static
+../Core/Inc/MainLogic.h:155:6:data_report	16	static
 ../Core/Inc/WS2812B.h:24:6:Set_LED	24	static
 ../Core/Inc/WS2812B.h:31:6:Set_Brightness	40	static
 ../Core/Inc/WS2812B.h:47:6:WS2812_Send	32	static

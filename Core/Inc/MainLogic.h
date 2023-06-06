@@ -9,7 +9,7 @@
 // PRIVATE TYPEDEF ================================================================================
 
 typedef enum {
-	MSidle, MSpick, MSplace, MShome, MSrun, MSpoint
+	MSwait, MSidle, MSpick, MSplace, MShome, MSrun, MSpoint
 } MachineState;
 
 // PRIVATE VARIABLE ===============================================================================
@@ -44,8 +44,15 @@ void main_logic(MB *variables) {
 	RGB_logic();
 	data_report(variables);
 
+	static uint32_t wait_timer;
 	switch (state) {
+	case MSwait:
+		if (HAL_GetTick() - wait_timer > 1500) {
+			state = MSidle;
+		}
+		break;
 	case MSidle:
+		wait_timer = HAL_GetTick();
 		variables->y_moving_status = 0;
 
 		if (variables->base_system_status & 0b100) {
@@ -53,6 +60,14 @@ void main_logic(MB *variables) {
 			variables->base_system_status = 0;
 			state = MShome;
 			variables->y_moving_status = 4;
+			variables->x_moving_status = 1;
+		}
+
+		if (variables->base_system_status & 0b10000) {
+			// point mode
+			variables->base_system_status = 0;
+			state = MSpoint;
+			variables->y_moving_status = 32;
 		}
 		break;
 	case MSpick:
@@ -63,12 +78,19 @@ void main_logic(MB *variables) {
 		if (!home_status) {
 			home_status = 1;
 			PID_enable = 0;
-			voltage = -8000;
+			voltage = -13000;
 		}
 		break;
 	case MSrun:
 		break;
 	case MSpoint:
+		setpoint = variables->goal_point_y / 0.3;
+		variables->x_target_position = variables->goal_point_x;
+		variables->x_moving_status = 2;
+
+		if (setpoint == getLocalPosition()) {
+			state = MSwait;
+		}
 		break;
 	}
 }
@@ -126,11 +148,11 @@ void home_handler() {
 	Trajectory(setpoint, 34000, 80000, (int*) &setpointtraj, (float*) &traj_velocity, (float*) &traj_acceleration, 1);
 	home_status = 0;
 	PID_enable = 1;
-	state = MSidle;
+	state = MSwait;
 	setpoint = 0;
 }
 
-void data_report(MB *variables){
+void data_report(MB *variables) {
 	variables->y_actual_position = getLocalPosition() * 0.3;
 	variables->y_actual_speed = traj_velocity * 0.3;
 	variables->y_actual_acceleration = traj_acceleration * 0.3;
