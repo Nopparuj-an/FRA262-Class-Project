@@ -18,6 +18,9 @@ MachineState state = MSidle;
 
 uint8_t PID_enable = 1;
 uint8_t home_status = 0;
+uint8_t jog_enable = 0;
+
+extern int receivedByte[4];
 
 float voltage;
 extern int32_t setpoint;
@@ -36,6 +39,8 @@ void end_effector_gripper(MB *variables, uint8_t mode);	// 0 pick, 1 place
 void end_effector_laser(MB *variables, uint8_t mode);	// 0 off, 1 on
 void home_handler();
 void data_report(MB *variables);
+void x_spam_position(MB *variables);
+void joystick_callback();
 
 // USER CODE ======================================================================================
 
@@ -54,6 +59,7 @@ void main_logic(MB *variables) {
 	case MSidle:
 		wait_timer = HAL_GetTick();
 		variables->y_moving_status = 0;
+		jog_enable = 0;
 
 		if (variables->base_system_status & 0b100) {
 			// home mode
@@ -69,10 +75,28 @@ void main_logic(MB *variables) {
 			state = MSpoint;
 			variables->y_moving_status = 32;
 		}
+
+		if (variables->base_system_status & 0b1) {
+			// pick mode
+			variables->base_system_status = 0;
+			state = MSpick;
+			variables->y_moving_status = 8;
+			jog_enable = 1;
+		}
+
+		if (variables->base_system_status & 0b10) {
+			// place mode
+			variables->base_system_status = 0;
+			state = MSplace;
+			variables->y_moving_status = 16;
+			jog_enable = 1;
+		}
 		break;
 	case MSpick:
+		x_spam_position(variables);
 		break;
 	case MSplace:
+		x_spam_position(variables);
 		break;
 	case MShome:
 		if (!home_status) {
@@ -156,6 +180,20 @@ void data_report(MB *variables) {
 	variables->y_actual_position = getLocalPosition() * 0.3;
 	variables->y_actual_speed = traj_velocity * 0.3;
 	variables->y_actual_acceleration = traj_acceleration * 0.3;
+}
+
+void x_spam_position(MB *variables) {
+	if ((variables->x_actual_position - variables->x_target_position) != 0 && variables->x_moving_status == 0) {
+		variables->x_moving_status = 2;
+	}
+}
+
+void joystick_callback(){
+	if(!jog_enable){
+		return;
+	}
+
+	receivedByte[0];
 }
 
 // USER CODE END ==================================================================================

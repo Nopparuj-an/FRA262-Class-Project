@@ -173,19 +173,6 @@ int main(void) {
 		QEIReadHome = getLocalPosition();
 		QEIReadRaw = getRawPosition();
 		main_logic(&MBvariables);
-
-//		static int8_t flip = 3;
-//		if (flip == 3 && MBvariables.x_moving_status == 1) {
-//			flip = 2;
-//		}
-//		if (flip == 2 && MBvariables.x_moving_status == 0) {
-//			flip = 0;
-//		}
-//		if (flip == 0) {
-//			if (abs(MBvariables.x_actual_position - MBvariables.x_target_position) > 1) {
-//				MBvariables.x_moving_status = 2;
-//			}
-//		}
 		/* USER CODE END WHILE */
 
 		/* USER CODE BEGIN 3 */
