@@ -124,6 +124,7 @@ void Trajectory(float setpoint_now, float velocity_max, float acceleration_max, 
 
 	if (setpoint_now == position) {
 		time_trajectory = 0;
+		acceleration = 0;
 	}
 	}
 

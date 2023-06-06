@@ -50,7 +50,7 @@ void modbus_init();
 
 // USER CODE ======================================================================================
 
-void modbus_init(){
+void modbus_init() {
 	hmodbus.huart = &huart2;
 	hmodbus.htim = &htim11;
 	hmodbus.slaveAddress = 0x15;
@@ -107,10 +107,16 @@ void modbus_data_sync(MB *variables) {
 	variables->x_actual_position = MBregisterFrame[0x44].U16;
 	variables->x_actual_speed = MBregisterFrame[0x45].U16;
 
+	static int16_t base_system_status_slave_temp;
 	static int16_t base_system_status_master_temp;
 	if (base_system_status_master_temp != MBregisterFrame[0x01].U16) {
 		variables->base_system_status = MBregisterFrame[0x01].U16;
 		base_system_status_master_temp = variables->base_system_status;
+		base_system_status_slave_temp = variables->base_system_status;
+	} else if (base_system_status_slave_temp != variables->base_system_status) {
+		MBregisterFrame[0x01].U16 = variables->base_system_status;
+		base_system_status_master_temp = variables->base_system_status;
+		base_system_status_slave_temp = variables->base_system_status;
 	}
 
 	// update read/write variable

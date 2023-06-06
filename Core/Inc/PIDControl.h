@@ -14,7 +14,7 @@
 
 // PRIVATE FUNCTION PROTOTYPE =====================================================================
 
-void PositionControlPID(float trajectory_setpoint, float position_now, float Kp,float Ki,float Kd, float *PID_out);
+void PositionControlPID(float trajectory_setpoint, float final_setpoint, float position_now, float Kp, float Ki, float Kd, float *PID_out);
 
 // USER CODE END ==================================================================================
 

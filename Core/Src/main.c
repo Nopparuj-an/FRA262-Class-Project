@@ -160,6 +160,8 @@ int main(void) {
 	// Initialize UART1
 	UARTInterruptConfig();
 
+	RGB_Bootup();
+
 	/* USER CODE END 2 */
 
 	/* Infinite loop */
@@ -171,7 +173,6 @@ int main(void) {
 		QEIReadHome = getLocalPosition();
 		QEIReadRaw = getRawPosition();
 		main_logic(&MBvariables);
-		RGB_Rainbow();
 
 		static int8_t flip = 3;
 		if (flip == 3 && MBvariables.x_moving_status == 1) {
@@ -244,7 +245,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 	if (huart == &huart1) {
-		Joystick_Received(&receivedByte);
+		Joystick_Received((int*)&receivedByte);
 	}
 }
 

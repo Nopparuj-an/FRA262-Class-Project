@@ -8,11 +8,13 @@
 
 // PRIVATE TYPEDEF ================================================================================
 
-enum MachineState {
+typedef enum {
 	MSidle, MSpick, MSplace, MShome, MSrun, MSpoint
-} state;
+} MachineState;
 
 // PRIVATE VARIABLE ===============================================================================
+
+MachineState state = MSidle;
 
 uint8_t PID_enable = 1;
 uint8_t home_status = 0;
@@ -33,14 +35,25 @@ void interrupt_logic();
 void end_effector_gripper(MB *variables, uint8_t mode);	// 0 pick, 1 place
 void end_effector_laser(MB *variables, uint8_t mode);	// 0 off, 1 on
 void home_handler();
+void data_report(MB *variables);
 
 // USER CODE ======================================================================================
 
 void main_logic(MB *variables) {
 	I2C_TO_BASESYSTEM(&variables->end_effector_status, &hi2c1);
+	RGB_logic();
+	data_report(variables);
 
 	switch (state) {
 	case MSidle:
+		variables->y_moving_status = 0;
+
+		if (variables->base_system_status & 0b100) {
+			// home mode
+			variables->base_system_status = 0;
+			state = MShome;
+			variables->y_moving_status = 4;
+		}
 		break;
 	case MSpick:
 		break;
@@ -50,7 +63,7 @@ void main_logic(MB *variables) {
 		if (!home_status) {
 			home_status = 1;
 			PID_enable = 0;
-			voltage = -13000;
+			voltage = -8000;
 		}
 		break;
 	case MSrun:
@@ -62,14 +75,14 @@ void main_logic(MB *variables) {
 
 void interrupt_logic() {
 	// Call trajectory function
-	Trajectory(setpoint, 34000, 80000, &setpointtraj, &traj_velocity, &traj_acceleration, 0);
+	Trajectory(setpoint, 34000, 80000, (int*) &setpointtraj, (float*) &traj_velocity, (float*) &traj_acceleration, 0);
 
 	// Call PID function
 	if (PID_enable) {
 		static int count = 0;
 		count++;
 		if (count >= 5) {
-			PositionControlPID(setpointtraj, getLocalPosition(), KP, KI, KD, &voltage);
+			PositionControlPID(setpointtraj, setpoint, getLocalPosition(), KP, KI, KD, &voltage);
 			count = 0;
 		}
 	}
@@ -110,11 +123,17 @@ void home_handler() {
 	homeoffset = getRawPosition() + 11500;
 	setpointtraj = -11500;
 	setpoint = -11500;
-	Trajectory(setpoint, 34000, 80000, &setpointtraj, &traj_velocity, &traj_acceleration, 1);
+	Trajectory(setpoint, 34000, 80000, (int*) &setpointtraj, (float*) &traj_velocity, (float*) &traj_acceleration, 1);
 	home_status = 0;
 	PID_enable = 1;
 	state = MSidle;
 	setpoint = 0;
+}
+
+void data_report(MB *variables){
+	variables->y_actual_position = getLocalPosition() * 0.3;
+	variables->y_actual_speed = traj_velocity * 0.3;
+	variables->y_actual_acceleration = traj_acceleration * 0.3;
 }
 
 // USER CODE END ==================================================================================
