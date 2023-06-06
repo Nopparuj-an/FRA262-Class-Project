@@ -23,8 +23,9 @@ uint8_t jog_enable = 0;
 extern int receivedByte[4];
 
 float voltage;
-extern int32_t setpoint;
-extern int32_t setpointtraj;
+extern int32_t setpoint_x;
+extern int32_t setpoint_y;
+extern int32_t setpointtraj_y;
 int32_t traj_velocity;
 int32_t traj_acceleration;
 extern float KP;
@@ -66,7 +67,7 @@ void main_logic(MB *variables) {
 			variables->base_system_status = 0;
 			state = MShome;
 			variables->y_moving_status = 4;
-			variables->x_moving_status = 1;
+//			variables->x_moving_status = 1;
 		}
 
 		if (variables->base_system_status & 0b10000) {
@@ -93,9 +94,11 @@ void main_logic(MB *variables) {
 		}
 		break;
 	case MSpick:
+		variables->x_target_position = setpoint_x;
 		x_spam_position(variables);
 		break;
 	case MSplace:
+		variables->x_target_position = setpoint_x;
 		x_spam_position(variables);
 		break;
 	case MShome:
@@ -108,11 +111,11 @@ void main_logic(MB *variables) {
 	case MSrun:
 		break;
 	case MSpoint:
-		setpoint = variables->goal_point_y / 0.3;
+		setpoint_y = variables->goal_point_y / 0.3;
 		variables->x_target_position = variables->goal_point_x;
 		variables->x_moving_status = 2;
 
-		if (setpoint == getLocalPosition()) {
+		if (setpoint_y == getLocalPosition()) {
 			state = MSwait;
 		}
 		break;
@@ -121,14 +124,14 @@ void main_logic(MB *variables) {
 
 void interrupt_logic() {
 	// Call trajectory function
-	Trajectory(setpoint, 34000, 80000, (int*) &setpointtraj, (float*) &traj_velocity, (float*) &traj_acceleration, 0);
+	Trajectory(setpoint_y, 34000, 80000, (int*) &setpointtraj_y, (float*) &traj_velocity, (float*) &traj_acceleration, 0);
 
 	// Call PID function
 	if (PID_enable) {
 		static int count = 0;
 		count++;
 		if (count >= 5) {
-			PositionControlPID(setpointtraj, setpoint, getLocalPosition(), KP, KI, KD, &voltage);
+			PositionControlPID(setpointtraj_y, setpoint_y, getLocalPosition(), KP, KI, KD, &voltage);
 			count = 0;
 		}
 	}
@@ -167,13 +170,13 @@ void home_handler() {
 	}
 	motor(0);
 	homeoffset = getRawPosition() + 11500;
-	setpointtraj = -11500;
-	setpoint = -11500;
-	Trajectory(setpoint, 34000, 80000, (int*) &setpointtraj, (float*) &traj_velocity, (float*) &traj_acceleration, 1);
+	setpointtraj_y = -11500;
+	setpoint_y = -11500;
+	Trajectory(setpoint_y, 34000, 80000, (int*) &setpointtraj_y, (float*) &traj_velocity, (float*) &traj_acceleration, 1);
 	home_status = 0;
 	PID_enable = 1;
 	state = MSwait;
-	setpoint = 0;
+	setpoint_y = 0;
 }
 
 void data_report(MB *variables) {
@@ -188,12 +191,25 @@ void x_spam_position(MB *variables) {
 	}
 }
 
-void joystick_callback(){
-	if(!jog_enable){
+void joystick_callback() {
+	if (!jog_enable) {
 		return;
 	}
 
-	receivedByte[0];
+	setpoint_x += receivedByte[0];
+	setpoint_y += receivedByte[1];
+
+	if (setpoint_x > 1400) {
+		setpoint_x = 1400;
+	} else if (setpoint_x < -1400) {
+		setpoint_x = -1400;
+	}
+
+	if (setpoint_y > 11667) {
+		setpoint_y = 11667;
+	} else if (setpoint_y < -11667) {
+		setpoint_y = -11667;
+	}
 }
 
 // USER CODE END ==================================================================================

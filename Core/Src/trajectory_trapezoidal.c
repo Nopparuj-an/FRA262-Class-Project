@@ -31,7 +31,7 @@ float target = 0;
 
 // USER CODE ======================================================================================
 
-void Trajectory(float setpoint_now, float velocity_max, float acceleration_max, int *position_out, float *velocity_out, float *acceleration_out, int homemode) {
+void Trajectory(float setpoint_now_input, float velocity_max, float acceleration_max, int *position_out, float *velocity_out, float *acceleration_out, int homemode) {
 	// velocity
 	static float max_velocity = 0;
 
@@ -50,19 +50,20 @@ void Trajectory(float setpoint_now, float velocity_max, float acceleration_max, 
 	static float distance = 0;
 
 	if(homemode == 1){
-		setpoint_past = setpoint_now;
+		setpoint_past = setpoint_now_input;
 		time_trajectory = 0;
 		abs_distance = 0;
 		distance = 0;
-		position = setpoint_now;
-		initial_position = setpoint_now;
+		position = setpoint_now_input;
+		initial_position = setpoint_now_input;
 		return;
 	}
 
 	else if(homemode == 0)
 	{
 		// distance and +-(sign)
-		if (setpoint_past != setpoint_now) {
+		if (setpoint_past != setpoint_now_input && time_trajectory == 0) {
+			setpoint_now = setpoint_now_input;
 			distance = setpoint_now - initial_position;
 			setpoint_past = setpoint_now;
 			if (distance >= 0) {

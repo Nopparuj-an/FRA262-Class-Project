@@ -62,8 +62,9 @@
 
 int32_t QEIReadRaw = 0;
 int32_t QEIReadHome = 0;
-int32_t setpoint = 0;
-int32_t setpointtraj = 0;
+int32_t setpoint_y = 0;
+int32_t setpoint_x = 0;
+int32_t setpointtraj_y = 0;
 int32_t homeoffset = 0;
 
 float KP = 114;
