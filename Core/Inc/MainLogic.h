@@ -9,7 +9,7 @@
 // PRIVATE TYPEDEF ================================================================================
 
 typedef enum {
-	MSwait, MSidle, MSpick, MSplace, MShome, MStray, MSpoint
+	MSwait, MSidle, MSpick, MSplace, MShome, MStray, MSpoint, MStestY, MStestXY
 } MachineState;
 
 // PRIVATE VARIABLE ===============================================================================
@@ -22,6 +22,7 @@ uint8_t jog_enable = 0;
 uint8_t jog_point_n = 0; // 0 - 2
 uint8_t tray_point_n = 0; // 0 - 8
 uint8_t tray_wait_mode = 0; // 0 ready, 1 wait for move to pick, 2 pick wait, 3 wait for move to place, 4 place wait
+uint32_t tray_delay;
 
 extern int receivedByte[4];
 extern MB MBvariables;
@@ -39,8 +40,10 @@ extern float KD;
 Coordinate corners[3];
 Coordinate pick[9];
 Coordinate place[9];
-Coordinate origin;
-float angle;
+Coordinate origin_pick;
+float angle_pick;
+Coordinate origin_place;
+float angle_place;
 
 // PRIVATE FUNCTION PROTOTYPE =====================================================================
 
@@ -52,6 +55,8 @@ void home_handler();
 void data_report(MB *variables);
 void x_spam_position(MB *variables);
 uint8_t move_finished(uint32_t tolerance);
+void preset_data_y_only();
+void preset_data_xy();
 
 // USER CODE ======================================================================================
 
@@ -101,6 +106,7 @@ void main_logic(MB *variables) {
 			variables->base_system_status = 0;
 			state = MStray;
 			tray_point_n = 0;
+			tray_delay = HAL_GetTick();
 		}
 
 		if (variables->base_system_status & 0b10000) {
@@ -127,20 +133,23 @@ void main_logic(MB *variables) {
 		switch (tray_wait_mode) {
 		case 0:
 			// move to pick
+			variables->y_moving_status = 8;
 			setpoint_x = pick[tray_point_n].x * 10;
 			setpoint_y = pick[tray_point_n].y / 0.03;
 			tray_wait_mode = 1;
 			break;
 		case 1:
 			// wait for move to finish then pick
-			if (move_finished(10)) {
-				end_effector_gripper(&variables, 0);
+			if (move_finished(6)) {
+				end_effector_gripper(variables, 0);
 				tray_wait_mode = 2;
+				tray_delay = HAL_GetTick() + 2000;
 			}
 			break;
 		case 2:
 			// wait for pick to finish then move to place
-			if (variables->end_effector_status == 2) {
+			if (HAL_GetTick() >= tray_delay) {
+				variables->y_moving_status = 16;
 				setpoint_x = place[tray_point_n].x * 10;
 				setpoint_y = place[tray_point_n].y / 0.03;
 				tray_wait_mode = 3;
@@ -148,14 +157,15 @@ void main_logic(MB *variables) {
 			break;
 		case 3:
 			// wait for move to place then place
-			if (move_finished(10)) {
-				end_effector_gripper(&variables, 1);
+			if (move_finished(6)) {
+				end_effector_gripper(variables, 1);
 				tray_wait_mode = 4;
+				tray_delay = HAL_GetTick() + 2000;
 			}
 			break;
 		case 4:
 			// wait for place to finish then reset to state 0
-			if (variables->end_effector_status == 2) {
+			if (HAL_GetTick() >= tray_delay) {
 				tray_wait_mode = 0;
 				tray_point_n++;
 			}
@@ -173,6 +183,14 @@ void main_logic(MB *variables) {
 		if (abs(setpoint_y - getLocalPosition()) < 10) {
 			state = MSwait;
 		}
+		break;
+	case MStestY:
+		preset_data_y_only();
+		state = MSidle;
+		break;
+	case MStestXY:
+		preset_data_xy();
+		state = MSidle;
 		break;
 	}
 }
@@ -276,15 +294,15 @@ void joystick_callback() {
 	}
 	if (jog_point_n >= 3) {
 		if (state == MSpick) {
-			localize(corners, pick, &origin, &angle);
-			MBvariables.pick_tray_orientation = (360.0 - (angle * 180.0 / M_PI)) * 100.0;
-			MBvariables.pick_tray_origin_x = origin.x * 10;
-			MBvariables.pick_tray_origin_y = origin.y * 10;
+			localize(corners, pick, &origin_pick, &angle_pick);
+			MBvariables.pick_tray_orientation = (360.0 - (angle_pick * 180.0 / M_PI)) * 100.0;
+			MBvariables.pick_tray_origin_x = origin_pick.x * 10;
+			MBvariables.pick_tray_origin_y = origin_pick.y * 10;
 		} else {
-			localize(corners, place, &origin, &angle);
-			MBvariables.place_tray_orientation = (360.0 - (angle * 180.0 / M_PI)) * 100.0;
-			MBvariables.place_tray_origin_x = origin.x * 10;
-			MBvariables.place_tray_origin_y = origin.y * 10;
+			localize(corners, place, &origin_place, &angle_place);
+			MBvariables.place_tray_orientation = (360.0 - (angle_place * 180.0 / M_PI)) * 100.0;
+			MBvariables.place_tray_origin_x = origin_place.x * 10;
+			MBvariables.place_tray_origin_y = origin_place.y * 10;
 		}
 		state = MSwait;
 		jog_point_n = 0;
@@ -296,6 +314,37 @@ uint8_t move_finished(uint32_t tolerance) {
 		return 1;
 	}
 	return 0;
+}
+
+void preset_data_y_only() {
+	for (int i = 0; i < 9; i++) {
+		pick[i].y = 38.0f + 38.0f * i;
+		place[i].y = -(38.0f + 38.0f * i);
+	}
+}
+
+void preset_data_xy() {
+	corners[0].x = -68.0;
+	corners[0].y = 7.1;
+	corners[1].x = -29.4;
+	corners[1].y = 52.7;
+	corners[2].x = 8.2;
+	corners[2].y = 21.2;
+	localize(corners, pick, &origin_pick, &angle_pick);
+	MBvariables.pick_tray_orientation = (360.0 - (angle_pick * 180.0 / M_PI)) * 100.0;
+	MBvariables.pick_tray_origin_x = origin_pick.x * 10;
+	MBvariables.pick_tray_origin_y = origin_pick.y * 10;
+
+	corners[0].x = -170.0;
+	corners[0].y = -90.3;
+	corners[1].x = -149.4;
+	corners[1].y = -46.1;
+	corners[2].x = -95.3;
+	corners[2].y = -69.6;
+	localize(corners, place, &origin_place, &angle_place);
+	MBvariables.place_tray_orientation = (360.0 - (angle_place * 180.0 / M_PI)) * 100.0;
+	MBvariables.place_tray_origin_x = origin_place.x * 10;
+	MBvariables.place_tray_origin_y = origin_place.y * 10;
 }
 
 // USER CODE END ==================================================================================
