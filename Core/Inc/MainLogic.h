@@ -127,11 +127,11 @@ void main_logic(MB *variables) {
 		if (!home_status) {
 			home_status = 1;
 			PID_enable = 0;
-			voltage = -13000;
+			voltage = -8000;
 		}
 		break;
 	case MStray:
-		variables->x_target_position = variables->goal_point_x;
+		variables->x_target_position = setpoint_x;
 		x_spam_position(variables);
 		switch (tray_wait_mode) {
 		case 0:
@@ -176,8 +176,8 @@ void main_logic(MB *variables) {
 			}
 			break;
 		}
-		if (tray_point_n >= 8) {
-			state = MSwait;
+		if (tray_point_n >= 9) {
+			state = MShome;
 		}
 		break;
 	case MSpoint:
@@ -329,23 +329,23 @@ void preset_data_y_only() {
 }
 
 void preset_data_xy() {
-	corners[0].x = -68.0;
-	corners[0].y = 7.1;
-	corners[1].x = -29.4;
-	corners[1].y = 52.7;
-	corners[2].x = 8.2;
-	corners[2].y = 21.2;
+	corners[0].x = 7.1;
+	corners[0].y = -68.0;
+	corners[1].x = 52.7;
+	corners[1].y = -29.4;
+	corners[2].x = 21.2;
+	corners[2].y = 8.2;
 	localize(corners, pick, &origin_pick, &angle_pick);
 	MBvariables.pick_tray_orientation = (360.0 - (angle_pick * 180.0 / M_PI)) * 100.0;
 	MBvariables.pick_tray_origin_x = origin_pick.x * 10;
 	MBvariables.pick_tray_origin_y = origin_pick.y * 10;
 
-	corners[0].x = -170.0;
-	corners[0].y = -90.3;
-	corners[1].x = -149.4;
-	corners[1].y = -46.1;
-	corners[2].x = -95.3;
-	corners[2].y = -69.6;
+	corners[0].x = -90.3;
+	corners[0].y = -170.0;
+	corners[1].x = -46.1;
+	corners[1].y = -149.4;
+	corners[2].x = -69.6;
+	corners[2].y = -95.3;
 	localize(corners, place, &origin_place, &angle_place);
 	MBvariables.place_tray_orientation = (360.0 - (angle_place * 180.0 / M_PI)) * 100.0;
 	MBvariables.place_tray_origin_x = origin_place.x * 10;

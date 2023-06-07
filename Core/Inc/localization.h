@@ -112,9 +112,9 @@ void localize(Coordinate *inputs, Coordinate *outputs, Coordinate *origin, float
 	}
 
 	// dirty fix for angle error
-	if (dir < 0){
-		*angle = *angle - M_PI;
-	}
+//	if (dir < 0){
+//		*angle = *angle - M_PI;
+//	}
 }
 
 Coordinate subtractCoordinates(Coordinate coord1, Coordinate coord2) {

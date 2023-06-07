@@ -1,7 +1,7 @@
 MotorEncoder.h:20:6:motor	5
 MotorEncoder.h:42:9:getLocalPosition	1
 MotorEncoder.h:46:9:getRawPosition	1
-Localization.h:25:6:localize	31
+Localization.h:25:6:localize	30
 Localization.h:120:12:subtractCoordinates	1
 Localization.h:127:7:calculateNorm	1
 Localization.h:132:12:negateCoordinate	1
