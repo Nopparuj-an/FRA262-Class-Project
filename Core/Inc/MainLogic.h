@@ -98,6 +98,8 @@ void main_logic(MB *variables) {
 			variables->base_system_status = 0;
 			state = MShome;
 			variables->y_moving_status = 4;
+			variables->x_target_position = 0;
+			variables->x_moving_status = 2;
 			//variables->x_moving_status = 1;
 		}
 
@@ -129,6 +131,7 @@ void main_logic(MB *variables) {
 		}
 		break;
 	case MStray:
+		variables->x_target_position = variables->goal_point_x;
 		x_spam_position(variables);
 		switch (tray_wait_mode) {
 		case 0:
@@ -136,11 +139,12 @@ void main_logic(MB *variables) {
 			variables->y_moving_status = 8;
 			setpoint_x = pick[tray_point_n].x * 10;
 			setpoint_y = pick[tray_point_n].y / 0.03;
+			variables->x_moving_status = 2;
 			tray_wait_mode = 1;
 			break;
 		case 1:
 			// wait for move to finish then pick
-			if (move_finished(6)) {
+			if (move_finished(10)) {
 				end_effector_gripper(variables, 0);
 				tray_wait_mode = 2;
 				tray_delay = HAL_GetTick() + 2000;
@@ -152,12 +156,13 @@ void main_logic(MB *variables) {
 				variables->y_moving_status = 16;
 				setpoint_x = place[tray_point_n].x * 10;
 				setpoint_y = place[tray_point_n].y / 0.03;
+				variables->x_moving_status = 2;
 				tray_wait_mode = 3;
 			}
 			break;
 		case 3:
 			// wait for move to place then place
-			if (move_finished(6)) {
+			if (move_finished(10)) {
 				end_effector_gripper(variables, 1);
 				tray_wait_mode = 4;
 				tray_delay = HAL_GetTick() + 2000;
@@ -318,8 +323,8 @@ uint8_t move_finished(uint32_t tolerance) {
 
 void preset_data_y_only() {
 	for (int i = 0; i < 9; i++) {
-		pick[i].y = 38.0f + 38.0f * i;
-		place[i].y = -(38.0f + 38.0f * i);
+		pick[i].y = 38.0 + 38.0 * i;
+		place[i].y = -(38.0 + 38.0 * i);
 	}
 }
 
