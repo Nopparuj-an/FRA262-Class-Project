@@ -71,16 +71,12 @@ float KP = 114;
 float KI = 0.196;
 float KD = 500;
 
-Coordinate corners[3];
-Coordinate pick[9];
-Coordinate place[9];
-Coordinate origin;
-float angle;
-
 MB MBvariables = { 0 };
 uint32_t modbus_count = 0;
 
 int receivedByte[4] = { 0 };
+
+uint32_t interrupt_count;
 
 /* USER CODE END PV */
 
@@ -104,14 +100,6 @@ int main(void) {
 
 	MBvariables.x_target_acceleration_time = 1;
 	MBvariables.x_target_speed = 1000;
-
-	corners[0].x = -68.0;
-	corners[0].y = 7.1;
-	corners[1].x = -29.4;
-	corners[1].y = 52.7;
-	corners[2].x = 8.2;
-	corners[2].y = 21.2;
-	localize(corners, pick, &origin, &angle);
 
 	/* USER CODE END 1 */
 
@@ -233,13 +221,14 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 	if (huart == &huart1) {
-		Joystick_Received((int*)&receivedByte);
+		Joystick_Received((int*) &receivedByte);
 	}
 }
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 	if (GPIO_Pin == GPIO_PIN_3) {
 		home_handler();
+		interrupt_count++;
 	}
 }
 

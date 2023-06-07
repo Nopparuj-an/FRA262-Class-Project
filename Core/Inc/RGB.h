@@ -11,8 +11,8 @@
 
 void RGB_Rainbow();
 void RGB_Power_Status();
-void RGB_Bootup();
 void RGB_logic(MachineState state, uint8_t point);
+void RGB_Bootup();
 
 // USER CODE ======================================================================================
 

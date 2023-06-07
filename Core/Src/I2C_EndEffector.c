@@ -96,7 +96,7 @@ void ENDEFF_GRIPPER_PLACE(I2C_HandleTypeDef *hi2c) {
 }
 
 
-void I2C_TO_BASESYSTEM(int16_t *DataFrame, I2C_HandleTypeDef *hi2c) {
+void ENE_I2C_UPDATE(int16_t *DataFrame, I2C_HandleTypeDef *hi2c) {
 	static int picked;
 	static enum {
 		INIT, TEST, RUNMODE, PICKED

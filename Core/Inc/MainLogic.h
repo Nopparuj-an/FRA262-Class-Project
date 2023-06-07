@@ -9,7 +9,7 @@
 // PRIVATE TYPEDEF ================================================================================
 
 typedef enum {
-	MSwait, MSidle, MSpick, MSplace, MShome, MSrun, MSpoint
+	MSwait, MSidle, MSpick, MSplace, MShome, MStray, MSpoint
 } MachineState;
 
 // PRIVATE VARIABLE ===============================================================================
@@ -19,8 +19,12 @@ MachineState state = MSidle;
 uint8_t PID_enable = 1;
 uint8_t home_status = 0;
 uint8_t jog_enable = 0;
+uint8_t jog_point_n = 0; // 0 - 2
+uint8_t tray_point_n = 0; // 0 - 8
+uint8_t tray_wait_mode = 0; // 0 ready, 1 wait for move to pick, 2 pick wait, 3 wait for move to place, 4 place wait
 
 extern int receivedByte[4];
+extern MB MBvariables;
 
 float voltage;
 extern int32_t setpoint_x;
@@ -32,6 +36,12 @@ extern float KP;
 extern float KI;
 extern float KD;
 
+Coordinate corners[3];
+Coordinate pick[9];
+Coordinate place[9];
+Coordinate origin;
+float angle;
+
 // PRIVATE FUNCTION PROTOTYPE =====================================================================
 
 void main_logic(MB *variables);
@@ -41,12 +51,12 @@ void end_effector_laser(MB *variables, uint8_t mode);	// 0 off, 1 on
 void home_handler();
 void data_report(MB *variables);
 void x_spam_position(MB *variables);
-void joystick_callback();
+uint8_t move_finished(uint32_t tolerance);
 
 // USER CODE ======================================================================================
 
 void main_logic(MB *variables) {
-	I2C_TO_BASESYSTEM(&variables->end_effector_status, &hi2c1);
+	ENE_I2C_UPDATE(&variables->end_effector_status, &hi2c1);
 	RGB_logic();
 	data_report(variables);
 
@@ -62,12 +72,35 @@ void main_logic(MB *variables) {
 		variables->y_moving_status = 0;
 		jog_enable = 0;
 
+		if (variables->base_system_status & 0b1) {
+			// pick mode
+			variables->base_system_status = 0;
+			state = MSpick;
+			variables->y_moving_status = 1;
+			jog_enable = 1;
+		}
+
+		if (variables->base_system_status & 0b10) {
+			// place mode
+			variables->base_system_status = 0;
+			state = MSplace;
+			variables->y_moving_status = 2;
+			jog_enable = 1;
+		}
+
 		if (variables->base_system_status & 0b100) {
 			// home mode
 			variables->base_system_status = 0;
 			state = MShome;
 			variables->y_moving_status = 4;
-//			variables->x_moving_status = 1;
+			//variables->x_moving_status = 1;
+		}
+
+		if (variables->base_system_status & 0b1000) {
+			// start tray mode
+			variables->base_system_status = 0;
+			state = MStray;
+			tray_point_n = 0;
 		}
 
 		if (variables->base_system_status & 0b10000) {
@@ -76,27 +109,8 @@ void main_logic(MB *variables) {
 			state = MSpoint;
 			variables->y_moving_status = 32;
 		}
-
-		if (variables->base_system_status & 0b1) {
-			// pick mode
-			variables->base_system_status = 0;
-			state = MSpick;
-			variables->y_moving_status = 8;
-			jog_enable = 1;
-		}
-
-		if (variables->base_system_status & 0b10) {
-			// place mode
-			variables->base_system_status = 0;
-			state = MSplace;
-			variables->y_moving_status = 16;
-			jog_enable = 1;
-		}
 		break;
-	case MSpick:
-		variables->x_target_position = setpoint_x;
-		x_spam_position(variables);
-		break;
+	case MSpick: // MSpick or MSplace
 	case MSplace:
 		variables->x_target_position = setpoint_x;
 		x_spam_position(variables);
@@ -108,14 +122,55 @@ void main_logic(MB *variables) {
 			voltage = -13000;
 		}
 		break;
-	case MSrun:
+	case MStray:
+		x_spam_position(variables);
+		switch (tray_wait_mode) {
+		case 0:
+			// move to pick
+			setpoint_x = pick[tray_point_n].x * 10;
+			setpoint_y = pick[tray_point_n].y / 0.03;
+			tray_wait_mode = 1;
+			break;
+		case 1:
+			// wait for move to finish then pick
+			if (move_finished(10)) {
+				end_effector_gripper(&variables, 0);
+				tray_wait_mode = 2;
+			}
+			break;
+		case 2:
+			// wait for pick to finish then move to place
+			if (variables->end_effector_status == 2) {
+				setpoint_x = place[tray_point_n].x * 10;
+				setpoint_y = place[tray_point_n].y / 0.03;
+				tray_wait_mode = 3;
+			}
+			break;
+		case 3:
+			// wait for move to place then place
+			if (move_finished(10)) {
+				end_effector_gripper(&variables, 1);
+				tray_wait_mode = 4;
+			}
+			break;
+		case 4:
+			// wait for place to finish then reset to state 0
+			if (variables->end_effector_status == 2) {
+				tray_wait_mode = 0;
+				tray_point_n++;
+			}
+			break;
+		}
+		if (tray_point_n >= 8) {
+			state = MSwait;
+		}
 		break;
 	case MSpoint:
 		setpoint_y = variables->goal_point_y / 0.3;
 		variables->x_target_position = variables->goal_point_x;
 		variables->x_moving_status = 2;
 
-		if (setpoint_y == getLocalPosition()) {
+		if (abs(setpoint_y - getLocalPosition()) < 10) {
 			state = MSwait;
 		}
 		break;
@@ -168,6 +223,9 @@ void home_handler() {
 	if (!home_status) {
 		return;
 	}
+	if (HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_3) == GPIO_PIN_SET) {
+		return;
+	}
 	motor(0);
 	homeoffset = getRawPosition() + 11500;
 	setpointtraj_y = -11500;
@@ -210,6 +268,34 @@ void joystick_callback() {
 	} else if (setpoint_y < -11667) {
 		setpoint_y = -11667;
 	}
+
+	if (receivedByte[2]) {
+		corners[jog_point_n].x = setpoint_x / 10.0;
+		corners[jog_point_n].y = setpoint_y * 0.03;
+		jog_point_n++;
+	}
+	if (jog_point_n >= 3) {
+		if (state == MSpick) {
+			localize(corners, pick, &origin, &angle);
+			MBvariables.pick_tray_orientation = (360.0 - (angle * 180.0 / M_PI)) * 100.0;
+			MBvariables.pick_tray_origin_x = origin.x * 10;
+			MBvariables.pick_tray_origin_y = origin.y * 10;
+		} else {
+			localize(corners, place, &origin, &angle);
+			MBvariables.place_tray_orientation = (360.0 - (angle * 180.0 / M_PI)) * 100.0;
+			MBvariables.place_tray_origin_x = origin.x * 10;
+			MBvariables.place_tray_origin_y = origin.y * 10;
+		}
+		state = MSwait;
+		jog_point_n = 0;
+	}
+}
+
+uint8_t move_finished(uint32_t tolerance) {
+	if (abs(getLocalPosition() - setpoint_y) < tolerance && abs(MBvariables.x_actual_position - setpoint_x) < tolerance) {
+		return 1;
+	}
+	return 0;
 }
 
 // USER CODE END ==================================================================================

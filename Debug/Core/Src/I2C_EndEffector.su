@@ -7,4 +7,4 @@
 ../Core/Src/I2C_EndEffector.c:70:6:ENDEFF_GRIPPER_IDLE	24	static
 ../Core/Src/I2C_EndEffector.c:79:6:ENDEFF_GRIPPER_PICK	24	static
 ../Core/Src/I2C_EndEffector.c:88:6:ENDEFF_GRIPPER_PLACE	24	static
-../Core/Src/I2C_EndEffector.c:99:6:I2C_TO_BASESYSTEM	16	static
+../Core/Src/I2C_EndEffector.c:99:6:ENE_I2C_UPDATE	16	static

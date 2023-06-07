@@ -21,5 +21,5 @@ void ENDEFF_GRIPPER_IDLE(I2C_HandleTypeDef* hi2c);
 void ENDEFF_GRIPPER_PICK(I2C_HandleTypeDef* hi2c);
 void ENDEFF_GRIPPER_PLACE(I2C_HandleTypeDef* hi2c);
 //I2C Comm with base system
-void I2C_TO_BASESYSTEM(int16_t* DataFrame, I2C_HandleTypeDef *hi2c);
+void ENE_I2C_UPDATE(int16_t* DataFrame, I2C_HandleTypeDef *hi2c);
 #endif /* INC_I2C_ENDEFFECTOR_H_ */
