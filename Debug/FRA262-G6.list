@@ -5685,10 +5685,10 @@ void main_logic(MB *variables) {
  8003058:	4b30      	ldr	r3, [pc, #192]	; (800311c <main_logic+0x2fc>)
  800305a:	2202      	movs	r2, #2
  800305c:	701a      	strb	r2, [r3, #0]
-				tray_delay = HAL_GetTick() + 2000;
+				tray_delay = HAL_GetTick() + 2200;
  800305e:	f002 fab1 	bl	80055c4 <HAL_GetTick>
  8003062:	4603      	mov	r3, r0
- 8003064:	f503 63fa 	add.w	r3, r3, #2000	; 0x7d0
+ 8003064:	f603 0398 	addw	r3, r3, #2200	; 0x898
  8003068:	4a26      	ldr	r2, [pc, #152]	; (8003104 <main_logic+0x2e4>)
  800306a:	6013      	str	r3, [r2, #0]
 			}
@@ -5787,10 +5787,10 @@ void main_logic(MB *variables) {
  8003140:	4b39      	ldr	r3, [pc, #228]	; (8003228 <main_logic+0x408>)
  8003142:	2204      	movs	r2, #4
  8003144:	701a      	strb	r2, [r3, #0]
-				tray_delay = HAL_GetTick() + 2000;
+				tray_delay = HAL_GetTick() + 2200;
  8003146:	f002 fa3d 	bl	80055c4 <HAL_GetTick>
  800314a:	4603      	mov	r3, r0
- 800314c:	f503 63fa 	add.w	r3, r3, #2000	; 0x7d0
+ 800314c:	f603 0398 	addw	r3, r3, #2200	; 0x898
  8003150:	4a36      	ldr	r2, [pc, #216]	; (800322c <main_logic+0x40c>)
  8003152:	6013      	str	r3, [r2, #0]
 			}
@@ -5836,9 +5836,9 @@ void main_logic(MB *variables) {
  8003188:	781b      	ldrb	r3, [r3, #0]
  800318a:	2b08      	cmp	r3, #8
  800318c:	d940      	bls.n	8003210 <main_logic+0x3f0>
-			state = MSwait;
+			state = MShome;
  800318e:	4b29      	ldr	r3, [pc, #164]	; (8003234 <main_logic+0x414>)
- 8003190:	2200      	movs	r2, #0
+ 8003190:	2204      	movs	r2, #4
  8003192:	701a      	strb	r2, [r3, #0]
 		}
 		break;

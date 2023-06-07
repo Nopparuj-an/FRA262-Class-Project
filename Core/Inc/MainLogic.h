@@ -147,7 +147,7 @@ void main_logic(MB *variables) {
 			if (move_finished(10)) {
 				end_effector_gripper(variables, 0);
 				tray_wait_mode = 2;
-				tray_delay = HAL_GetTick() + 2000;
+				tray_delay = HAL_GetTick() + 2200;
 			}
 			break;
 		case 2:
@@ -165,7 +165,7 @@ void main_logic(MB *variables) {
 			if (move_finished(10)) {
 				end_effector_gripper(variables, 1);
 				tray_wait_mode = 4;
-				tray_delay = HAL_GetTick() + 2000;
+				tray_delay = HAL_GetTick() + 2200;
 			}
 			break;
 		case 4:
