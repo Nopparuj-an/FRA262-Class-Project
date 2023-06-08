@@ -183,7 +183,10 @@ void main_logic(MB *variables) {
 			break;
 		}
 		if (tray_point_n >= 9) {
-			state = MShome;
+			setpoint_y = 0;
+			variables->x_target_position = 0;
+			variables->x_moving_status = 2;
+			state = MSidle;
 		}
 		break;
 	case MSpoint:
