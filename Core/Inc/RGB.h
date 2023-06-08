@@ -9,14 +9,20 @@
 
 // PRIVATE FUNCTION PROTOTYPE =====================================================================
 
+void RGB_logic(MachineState state, uint8_t point, uint8_t emergency);
 void RGB_Rainbow();
 void RGB_Power_Status();
-void RGB_logic(MachineState state, uint8_t point);
 void RGB_Bootup();
+void RGB_BreathingPattern(uint32_t period, uint8_t R, uint8_t G, uint8_t B);
+
+// PRIVATE VARIABLE ===============================================================================
+
+uint32_t LEDtime = 0;
+MachineState laststate = MSidle;
 
 // USER CODE ======================================================================================
 
-void RGB_logic(MachineState state, uint8_t point) {
+void RGB_logic(MachineState state, uint8_t point, uint8_t emergency) {
 	// Run on 200 Hz
 	static uint32_t timestamp;
 	if (HAL_GetTick() - timestamp < 5) {
@@ -25,14 +31,51 @@ void RGB_logic(MachineState state, uint8_t point) {
 	timestamp = HAL_GetTick() + 5;
 
 	// Main logic here
-	RGB_Rainbow();
+	if (emergency) {
+		// TODO add emergency animation
+		RGB_BreathingPattern(500, 255, 0, 0);
+		WS2812_Send();
+		Set_Brightness(45);
+		return;
+	} else {
+		switch (state) {
+		case MSwait:
+			RGB_BreathingPattern(500, 0, 255, 0);
+			laststate = MSwait;
+			break;
+		case MSidle:
+			if (laststate != state) {
+				LEDtime = 0;
+			}
+			RGB_Rainbow();
+			laststate = MSidle;
+			break;
+		case MSpick:
+		case MSplace:
+			laststate = MSpick;
+			break;
+		case MShome:
+			RGB_BreathingPattern(500, 0, 0, 255);
+			laststate = MShome;
+			break;
+		case MStray:
+			laststate = MStray;
+			break;
+		case MSpoint:
+			laststate = MSpoint;
+			RGB_BreathingPattern(500, 255, 165, 0);
+			break;
+		default:
+			break;
+		}
+	}
 
-	for(int i = 16; i < 24; i++){
+	for (int i = 16; i < 24; i++) {
 		Set_LED(i, 0, 0, 0);
 	}
 
-	WS2812_Send();
 	Set_Brightness(45);
+	WS2812_Send();
 }
 
 void RGB_Rainbow() {
@@ -90,10 +133,22 @@ void RGB_Rainbow() {
 			blue = x;
 		}
 
+		// slow fade in
+		if (LEDtime == 0) {
+			LEDtime = HAL_GetTick();
+		}
+
+		float intensity;
+		if (HAL_GetTick() - LEDtime < 4000) {
+			intensity = (HAL_GetTick() - LEDtime) / 2000.0;
+		} else {
+			intensity = 1;
+		}
+
 		// Scale RGB values to 0-255 range
-		uint8_t r = (uint8_t) (red * 255);
-		uint8_t g = (uint8_t) (green * 255);
-		uint8_t b = (uint8_t) (blue * 255);
+		uint8_t r = (uint8_t) (red * 255.0 * intensity);
+		uint8_t g = (uint8_t) (green * 255.0 * intensity);
+		uint8_t b = (uint8_t) (blue * 255.0 * intensity);
 
 		// Set LED color
 		Set_LED(i, r, g, b);
@@ -106,6 +161,21 @@ void RGB_Bootup(void) {
 		HAL_Delay(10);
 		Set_Brightness(45);
 		WS2812_Send();
+	}
+}
+
+void RGB_BreathingPattern(uint32_t period, uint8_t R, uint8_t G, uint8_t B) {
+	if (LEDtime == 0) {
+		LEDtime = HAL_GetTick();
+	}
+
+	uint32_t elapsedTime = HAL_GetTick() - LEDtime;
+	float intensity;
+
+	intensity = 0.5 * (1.0 + sinf((2.0 * PI * elapsedTime) / period));
+
+	for (int i = 0; i < MAX_LED; i++) {
+		Set_LED(i, R * intensity, G * intensity, B * intensity);
 	}
 }
 
