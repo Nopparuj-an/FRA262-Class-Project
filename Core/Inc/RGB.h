@@ -34,6 +34,7 @@ void RGB_logic(MachineState state, uint8_t point, uint8_t emergency) {
 
 	// Main logic here
 	if (emergency) {
+		laststate = MSwait;
 		RGB_BreathingPattern(500, 255, 0, 0);
 		WS2812_Send();
 		Set_Brightness(45);
@@ -41,11 +42,14 @@ void RGB_logic(MachineState state, uint8_t point, uint8_t emergency) {
 	} else {
 		switch (state) {
 		case MSwait:
+			if (laststate != MSwait) {
+				LEDtime = 0;
+			}
 			RGB_BreathingPattern(500, 0, 255, 0);
 			laststate = MSwait;
 			break;
 		case MSidle:
-			if (laststate != state) {
+			if (laststate != MSidle) {
 				LEDtime = 0;
 			}
 			RGB_Rainbow();
@@ -61,7 +65,7 @@ void RGB_logic(MachineState state, uint8_t point, uint8_t emergency) {
 			laststate = MShome;
 			break;
 		case MStray:
-			if (laststate != state) {
+			if (laststate != MStray) {
 				RGB_off();
 			}
 			RGB_TrayProgress(point);
@@ -188,8 +192,22 @@ void RGB_BreathingPattern(uint32_t period, uint8_t R, uint8_t G, uint8_t B) {
 
 	intensity = 0.5 * (1.0 + sinf((2.0 * PI * elapsedTime) / period));
 
+	// slow fade in
+	if (LEDtime == 0) {
+		LEDtime = HAL_GetTick();
+	}
+
+	float intensity2;
+	if (HAL_GetTick() - LEDtime < 4000) {
+		intensity2 = (HAL_GetTick() - LEDtime) / 4000.0;
+	} else {
+		intensity2 = 1;
+	}
+
+	intensity2 = sqrt(intensity2);
+
 	for (int i = 0; i < MAX_LED; i++) {
-		Set_LED(i, R * intensity, G * intensity, B * intensity);
+		Set_LED(i, R * intensity * intensity2, G * intensity * intensity2, B * intensity * intensity2);
 	}
 }
 
