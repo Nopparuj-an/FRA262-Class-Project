@@ -1,3 +1,3 @@
 ../Core/Src/Joystick.c:12:6:UARTInterruptConfig	8	static
 ../Core/Src/Joystick.c:16:6:Joystick_Transmit	16	static
-../Core/Src/Joystick.c:40:6:Joystick_Received	24	static
+../Core/Src/Joystick.c:43:6:Joystick_Received	24	static

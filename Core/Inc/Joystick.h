@@ -10,7 +10,7 @@
 #include "stm32f4xx_hal.h"
 
 void UARTInterruptConfig();
-void Joystick_Received(int* receivedByte);
-void Joystick_Transmit(int16_t Position_x, int16_t Position_y);
+void Joystick_Received(int *receivedByte);
+void Joystick_Transmit(int16_t Position_x, int16_t Position_y, uint8_t PicknPlace);
 
 #endif /* INC_JOYSTICK_H_ */
