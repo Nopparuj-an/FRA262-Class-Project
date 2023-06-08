@@ -130,7 +130,10 @@ void main_logic(MB *variables) {
 		x_spam_position(variables);
 		break;
 	case MShome:
-		if (!home_status) {
+		if (HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_3) == GPIO_PIN_RESET) {
+			home_status = 1;
+			home_handler();
+		} else if (!home_status) {
 			home_status = 1;
 			PID_enable = 0;
 			voltage = -8000;
