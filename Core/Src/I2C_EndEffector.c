@@ -96,11 +96,16 @@ void ENDEFF_GRIPPER_PLACE(I2C_HandleTypeDef *hi2c) {
 }
 
 
-void ENE_I2C_UPDATE(int16_t *DataFrame, I2C_HandleTypeDef *hi2c) {
+void ENE_I2C_UPDATE(int16_t *DataFrame, I2C_HandleTypeDef *hi2c, uint8_t reinit) {
 	static int picked;
 	static enum {
 		INIT, TEST, RUNMODE, PICKED
 	} END_EFFECTOR_STATE = INIT;
+
+	if(reinit){
+		END_EFFECTOR_STATE = INIT;
+	}
+
 	switch (END_EFFECTOR_STATE) {
 	case (INIT):
 		if ((*DataFrame & 0b0001) == 1) {

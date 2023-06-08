@@ -37,9 +37,9 @@
 #include <trajectory_trapezoidal.h>
 #include <Localization.h>
 #include <BaseSystemModbus.h>
-#include <MainLogic.h>
 #include <RGB.h>
 #include <Joystick.h>
+#include <MainLogic.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -131,6 +131,7 @@ int main(void) {
 	MX_TIM9_Init();
 	MX_TIM11_Init();
 	MX_TIM3_Init();
+	MX_USART6_UART_Init();
 	/* USER CODE BEGIN 2 */
 
 	// start timer 1 in PWM for motor

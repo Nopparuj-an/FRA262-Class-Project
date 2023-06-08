@@ -5,6 +5,7 @@
 
 #include <I2C_EndEffector.h>
 #include "i2c.h"
+#include <Joystick.h>
 
 // PRIVATE TYPEDEF ================================================================================
 
@@ -15,6 +16,8 @@ typedef enum {
 // PRIVATE VARIABLE ===============================================================================
 
 MachineState state = MSidle;
+
+uint8_t emergency;
 
 uint8_t PID_enable = 1;
 uint8_t home_status = 0;
@@ -57,13 +60,16 @@ void x_spam_position(MB *variables);
 uint8_t move_finished(uint32_t tolerance);
 void preset_data_y_only();
 void preset_data_xy();
+void emergency_handler();
 
 // USER CODE ======================================================================================
 
 void main_logic(MB *variables) {
-	ENE_I2C_UPDATE(&variables->end_effector_status, &hi2c1);
+	ENE_I2C_UPDATE(&variables->end_effector_status, &hi2c1, 0);
 	RGB_logic();
 	data_report(variables);
+	Joystick_Transmit(variables->x_target_position, setpoint_y * 0.3);
+	emergency_handler();
 
 	static uint32_t wait_timer;
 	switch (state) {
@@ -202,7 +208,7 @@ void main_logic(MB *variables) {
 
 void interrupt_logic() {
 	// Call trajectory function
-	Trajectory(setpoint_y, 34000, 80000, (int*) &setpointtraj_y, (float*) &traj_velocity, (float*) &traj_acceleration, 0);
+	Trajectory(setpoint_y, 34000, 60000, (int*) &setpointtraj_y, (float*) &traj_velocity, (float*) &traj_acceleration, 0);
 
 	// Call PID function
 	if (PID_enable) {
@@ -350,6 +356,25 @@ void preset_data_xy() {
 	MBvariables.place_tray_orientation = (360.0 - (angle_place * 180.0 / M_PI)) * 100.0;
 	MBvariables.place_tray_origin_x = origin_place.x * 10;
 	MBvariables.place_tray_origin_y = origin_place.y * 10;
+}
+
+void emergency_handler() {
+	static uint8_t prev_state;
+	emergency = !HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_2);
+
+	// going into emergency
+	if (!prev_state && emergency) {
+		ENDEFF_EMERGENCY(&hi2c1);
+	}
+
+	// leaving emergency
+	if (prev_state && !emergency) {
+		ENDEFF_EMERGENCY_QUIT(&hi2c1);
+		HAL_Delay(11);
+		ENE_I2C_UPDATE(&MBvariables.end_effector_status, &hi2c1, 1);
+	}
+
+	prev_state = emergency;
 }
 
 // USER CODE END ==================================================================================
