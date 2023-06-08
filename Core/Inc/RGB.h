@@ -10,10 +10,12 @@
 // PRIVATE FUNCTION PROTOTYPE =====================================================================
 
 void RGB_logic(MachineState state, uint8_t point, uint8_t emergency);
+void RGB_off();
 void RGB_Rainbow();
 void RGB_Power_Status();
 void RGB_Bootup();
 void RGB_BreathingPattern(uint32_t period, uint8_t R, uint8_t G, uint8_t B);
+void RGB_TrayProgress(uint8_t point);
 
 // PRIVATE VARIABLE ===============================================================================
 
@@ -32,7 +34,6 @@ void RGB_logic(MachineState state, uint8_t point, uint8_t emergency) {
 
 	// Main logic here
 	if (emergency) {
-		// TODO add emergency animation
 		RGB_BreathingPattern(500, 255, 0, 0);
 		WS2812_Send();
 		Set_Brightness(45);
@@ -52,6 +53,7 @@ void RGB_logic(MachineState state, uint8_t point, uint8_t emergency) {
 			break;
 		case MSpick:
 		case MSplace:
+			RGB_BreathingPattern(500, 255, 255, 255);
 			laststate = MSpick;
 			break;
 		case MShome:
@@ -59,6 +61,10 @@ void RGB_logic(MachineState state, uint8_t point, uint8_t emergency) {
 			laststate = MShome;
 			break;
 		case MStray:
+			if (laststate != state) {
+				RGB_off();
+			}
+			RGB_TrayProgress(point);
 			laststate = MStray;
 			break;
 		case MSpoint:
@@ -70,12 +76,18 @@ void RGB_logic(MachineState state, uint8_t point, uint8_t emergency) {
 		}
 	}
 
-	for (int i = 16; i < 24; i++) {
-		Set_LED(i, 0, 0, 0);
-	}
+//	for (int i = 16; i < 24; i++) {
+//		Set_LED(i, 0, 0, 0);
+//	}
 
 	Set_Brightness(45);
 	WS2812_Send();
+}
+
+void RGB_off() {
+	for (int i = 0; i < MAX_LED; i++) {
+		Set_LED(i, 0, 0, 0);
+	}
 }
 
 void RGB_Rainbow() {
@@ -140,10 +152,12 @@ void RGB_Rainbow() {
 
 		float intensity;
 		if (HAL_GetTick() - LEDtime < 4000) {
-			intensity = (HAL_GetTick() - LEDtime) / 2000.0;
+			intensity = (HAL_GetTick() - LEDtime) / 4000.0;
 		} else {
 			intensity = 1;
 		}
+
+		intensity = sqrt(intensity);
 
 		// Scale RGB values to 0-255 range
 		uint8_t r = (uint8_t) (red * 255.0 * intensity);
@@ -176,6 +190,14 @@ void RGB_BreathingPattern(uint32_t period, uint8_t R, uint8_t G, uint8_t B) {
 
 	for (int i = 0; i < MAX_LED; i++) {
 		Set_LED(i, R * intensity, G * intensity, B * intensity);
+	}
+}
+
+void RGB_TrayProgress(uint8_t point) {
+	float percentage = (point + 1.0) / 9.0;
+
+	for (int i = 0; i < (int) (60.0 * percentage); i++) {
+		Set_LED(i, 0, 255, 0);
 	}
 }
 

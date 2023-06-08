@@ -66,7 +66,7 @@ void emergency_handler();
 
 void main_logic(MB *variables) {
 	ENE_I2C_UPDATE(&variables->end_effector_status, &hi2c1, 0);
-	RGB_logic(state, jog_point_n, emergency);
+	RGB_logic(state, tray_point_n, emergency);
 	data_report(variables);
 	Joystick_Transmit(variables->x_target_position, setpoint_y * 0.3, jog_enable + jog_point_n);
 	emergency_handler();
@@ -184,6 +184,7 @@ void main_logic(MB *variables) {
 		}
 		if (tray_point_n >= 9) {
 			setpoint_y = 0;
+			tray_point_n = 0;
 			variables->x_target_position = 0;
 			variables->x_moving_status = 2;
 			state = MSidle;
