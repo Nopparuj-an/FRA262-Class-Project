@@ -72,7 +72,12 @@ void main_logic(MB *variables) {
 	RGB_logic(state, tray_point_n, emergency);
 	data_report(variables);
 	Joystick_Transmit(variables->x_target_position, setpoint_y * 0.3, jog_enable + jog_point_n);
+
 	emergency_handler();
+	if (emergency) {
+		return;
+	}
+
 	x_spam_position(variables);
 
 	static uint32_t wait_timer;
@@ -117,6 +122,7 @@ void main_logic(MB *variables) {
 			// start tray mode
 			variables->base_system_status = 0;
 			state = MStray;
+			tray_wait_mode = 0;
 			tray_point_n = 0;
 			tray_delay = HAL_GetTick();
 		}
@@ -385,6 +391,11 @@ void emergency_handler() {
 		ENDEFF_EMERGENCY_QUIT(&hi2c1);
 		HAL_Delay(11);
 		ENE_I2C_UPDATE(&MBvariables.end_effector_status, &hi2c1, 1);
+	}
+
+	if (emergency) {
+		PID_enable = 0;
+		state = MSidle;
 	}
 
 	prev_state = emergency;
