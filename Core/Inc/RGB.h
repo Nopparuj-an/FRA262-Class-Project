@@ -11,7 +11,7 @@
 
 void RGB_logic(MachineState state, uint8_t point, uint8_t emergency);
 void RGB_off();
-void RGB_Rainbow();
+void RGB_Rainbow(uint8_t dobreathing);
 void RGB_Power_Status();
 void RGB_Bootup();
 void RGB_BreathingPattern(uint32_t period, uint8_t R, uint8_t G, uint8_t B);
@@ -36,8 +36,8 @@ void RGB_logic(MachineState state, uint8_t point, uint8_t emergency) {
 	if (emergency) {
 		laststate = MSwait;
 		RGB_BreathingPattern(500, 255, 0, 0);
-		WS2812_Send();
 		Set_Brightness(45);
+		WS2812_Send();
 		return;
 	} else {
 		switch (state) {
@@ -52,7 +52,7 @@ void RGB_logic(MachineState state, uint8_t point, uint8_t emergency) {
 			if (laststate != MSidle) {
 				LEDtime = 0;
 			}
-			RGB_Rainbow();
+			RGB_Rainbow(!MBvariables.heartbeat);
 			laststate = MSidle;
 			break;
 		case MSpick:
@@ -94,7 +94,7 @@ void RGB_off() {
 	}
 }
 
-void RGB_Rainbow() {
+void RGB_Rainbow(uint8_t dobreathing) {
 	static uint32_t startTime = 0;
 	static const uint32_t transitionDuration = 5000; // Transition duration in milliseconds
 
@@ -163,10 +163,18 @@ void RGB_Rainbow() {
 
 		intensity = sqrt(intensity);
 
+		// breathing pattern
+		float intensity2;
+		if (dobreathing) {
+			intensity2 = 0.1 + 0.9 * (0.5 * (1.0 + sinf((2.0 * PI * elapsed) / 2000)));
+		} else {
+			intensity2 = 1.0;
+		}
+
 		// Scale RGB values to 0-255 range
-		uint8_t r = (uint8_t) (red * 255.0 * intensity);
-		uint8_t g = (uint8_t) (green * 255.0 * intensity);
-		uint8_t b = (uint8_t) (blue * 255.0 * intensity);
+		uint8_t r = (uint8_t) (red * 255.0 * intensity * intensity2);
+		uint8_t g = (uint8_t) (green * 255.0 * intensity * intensity2);
+		uint8_t b = (uint8_t) (blue * 255.0 * intensity * intensity2);
 
 		// Set LED color
 		Set_LED(i, r, g, b);

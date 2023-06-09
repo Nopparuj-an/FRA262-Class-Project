@@ -1,0 +1,2 @@
+../Core/Src/LowpassFilter.c:12:7:ComputeLowpassConstant	16	static
+../Core/Src/LowpassFilter.c:19:6:lowpass_filter	48	static

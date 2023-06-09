@@ -1,5 +1,6 @@
 "./Core/Src/I2C_EndEffector.o"
 "./Core/Src/Joystick.o"
+"./Core/Src/LowpassFilter.o"
 "./Core/Src/ModBusRTU.o"
 "./Core/Src/PIDControl.o"
 "./Core/Src/adc.o"

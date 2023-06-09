@@ -6,6 +6,7 @@
 #include <I2C_EndEffector.h>
 #include "i2c.h"
 #include <Joystick.h>
+#include <LowpassFilter.h>
 
 // PRIVATE TYPEDEF ================================================================================
 
@@ -33,9 +34,11 @@ extern MB MBvariables;
 float voltage;
 extern int32_t setpoint_x;
 extern int32_t setpoint_y;
-extern int32_t setpointtraj_y;
+int32_t setpointtraj_y;
 int32_t traj_velocity;
 int32_t traj_acceleration;
+float actual_velocity;
+float actual_acceleration;
 extern float KP;
 extern float KI;
 extern float KD;
@@ -217,6 +220,8 @@ void interrupt_logic() {
 	// Call trajectory function
 	Trajectory(setpoint_y, 34000, 60000, (int*) &setpointtraj_y, (float*) &traj_velocity, (float*) &traj_acceleration, 0);
 
+	lowpass_filter(getRawPosition(), &actual_velocity, &actual_acceleration);
+
 	// Call PID function
 	if (PID_enable) {
 		static int count = 0;
@@ -275,8 +280,8 @@ void home_handler() {
 
 void data_report(MB *variables) {
 	variables->y_actual_position = getLocalPosition() * 0.3;
-	variables->y_actual_speed = traj_velocity * 0.3;
-	variables->y_actual_acceleration = traj_acceleration * 0.3;
+	variables->y_actual_speed = abs(actual_velocity) * 0.3;
+	variables->y_actual_acceleration = abs(actual_acceleration) * 0.3;
 }
 
 void x_spam_position(MB *variables) {

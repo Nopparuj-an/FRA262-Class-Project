@@ -95,15 +95,22 @@ void ENDEFF_GRIPPER_PLACE(I2C_HandleTypeDef *hi2c) {
 	}
 }
 
-
 void ENE_I2C_UPDATE(int16_t *DataFrame, I2C_HandleTypeDef *hi2c, uint8_t reinit) {
 	static int picked;
+	static uint32_t feedback_delay;
+	static uint8_t feedback_flag;
 	static enum {
 		INIT, TEST, RUNMODE, PICKED
 	} END_EFFECTOR_STATE = INIT;
 
-	if(reinit){
+	if (reinit) {
 		END_EFFECTOR_STATE = INIT;
+		feedback_flag = 0;
+	}
+
+	if (feedback_flag && (HAL_GetTick() - feedback_delay > 2200)) {
+		feedback_flag = 0;
+		*DataFrame = 0b0010;
 	}
 
 	switch (END_EFFECTOR_STATE) {
@@ -154,7 +161,8 @@ void ENE_I2C_UPDATE(int16_t *DataFrame, I2C_HandleTypeDef *hi2c, uint8_t reinit)
 		} else if ((*DataFrame & 0b0100) == 0b100) {
 			ENDEFF_GRIPPER_PICK(hi2c);
 			if (complete == 1) {
-				*DataFrame = 0b0010;
+				feedback_flag = 1;
+				feedback_delay = HAL_GetTick();
 				END_EFFECTOR_STATE = PICKED;
 				complete = 0;
 				picked = 1;
@@ -163,7 +171,8 @@ void ENE_I2C_UPDATE(int16_t *DataFrame, I2C_HandleTypeDef *hi2c, uint8_t reinit)
 			if (picked == 1) {
 				ENDEFF_GRIPPER_PLACE(hi2c);
 				if (complete == 1) {
-					*DataFrame = 0b0010;
+					feedback_flag = 1;
+					feedback_delay = HAL_GetTick();
 					complete = 0;
 					picked = 0;
 				}
@@ -186,7 +195,8 @@ void ENE_I2C_UPDATE(int16_t *DataFrame, I2C_HandleTypeDef *hi2c, uint8_t reinit)
 		} else if ((*DataFrame & 0b1000) == 0b1000) {
 			ENDEFF_GRIPPER_PLACE(hi2c);
 			if (complete == 1) {
-				*DataFrame = 0b0010;
+				feedback_flag = 1;
+				feedback_delay = HAL_GetTick();
 				END_EFFECTOR_STATE = RUNMODE;
 				complete = 0;
 				picked = 0;

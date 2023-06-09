@@ -1,4 +1,5 @@
-Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
+Core/Src/LowpassFilter.o: ../Core/Src/LowpassFilter.c \
+ ../Core/Inc/LowpassFilter.h ../Core/Inc/main.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h \
  ../Core/Inc/stm32f4xx_hal_conf.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_rcc.h \
@@ -31,17 +32,8 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr_ex.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h \
- ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h \
- ../Core/Inc/adc.h ../Core/Inc/main.h ../Core/Inc/dma.h ../Core/Inc/i2c.h \
- ../Core/Inc/tim.h ../Core/Inc/usart.h ../Core/Inc/gpio.h \
- ../Middlewares/Third_Party/ARM_CMSIS/CMSIS/DSP/Include/arm_math.h \
- ../Drivers/CMSIS/Include/cmsis_compiler.h ../Core/Inc/MotorEncoder.h \
- ../Core/Inc/tim.h ../Core/Inc/PIDControl.h \
- ../Core/Inc/trajectory_trapezoidal.h ../Core/Inc/Localization.h \
- ../Core/Inc/BaseSystemModbus.h ../Core/Inc/ModBusRTU.h \
- ../Core/Inc/usart.h ../Core/Inc/RGB.h ../Core/Inc/WS2812B.h \
- ../Core/Inc/MainLogic.h ../Core/Inc/I2C_EndEffector.h ../Core/Inc/i2c.h \
- ../Core/Inc/Joystick.h ../Core/Inc/LowpassFilter.h
+ ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h
+../Core/Inc/LowpassFilter.h:
 ../Core/Inc/main.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h:
 ../Core/Inc/stm32f4xx_hal_conf.h:
@@ -76,27 +68,3 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h:
-../Core/Inc/adc.h:
-../Core/Inc/main.h:
-../Core/Inc/dma.h:
-../Core/Inc/i2c.h:
-../Core/Inc/tim.h:
-../Core/Inc/usart.h:
-../Core/Inc/gpio.h:
-../Middlewares/Third_Party/ARM_CMSIS/CMSIS/DSP/Include/arm_math.h:
-../Drivers/CMSIS/Include/cmsis_compiler.h:
-../Core/Inc/MotorEncoder.h:
-../Core/Inc/tim.h:
-../Core/Inc/PIDControl.h:
-../Core/Inc/trajectory_trapezoidal.h:
-../Core/Inc/Localization.h:
-../Core/Inc/BaseSystemModbus.h:
-../Core/Inc/ModBusRTU.h:
-../Core/Inc/usart.h:
-../Core/Inc/RGB.h:
-../Core/Inc/WS2812B.h:
-../Core/Inc/MainLogic.h:
-../Core/Inc/I2C_EndEffector.h:
-../Core/Inc/i2c.h:
-../Core/Inc/Joystick.h:
-../Core/Inc/LowpassFilter.h:
