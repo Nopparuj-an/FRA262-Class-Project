@@ -73,6 +73,7 @@ void main_logic(MB *variables) {
 	data_report(variables);
 	Joystick_Transmit(variables->x_target_position, setpoint_y * 0.3, jog_enable + jog_point_n);
 	emergency_handler();
+	x_spam_position(variables);
 
 	static uint32_t wait_timer;
 	switch (state) {
