@@ -7,15 +7,59 @@
 
 uint8_t speaker_queue = 0;
 uint8_t speaker_data[8];
+uint8_t speaker_state;
 
 // PRIVATE FUNCTION PROTOTYPE =====================================================================
 
-void speaker_logic();
+extern MB MBvariables;
+
 void speaker_play(uint8_t folder, uint8_t track);
+void speaker_UART_bitbang();
+void speaker_logic();
+uint8_t lastmodbusstate = 0;
 
 // USER CODE ======================================================================================
 
 void speaker_logic() {
+	switch (speaker_state) {
+	case 0:
+		if (HAL_GetTick() > 5000) {
+			speaker_state = 1;
+			if (!MBvariables.heartbeat && !HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_10)) {
+				speaker_play(51, 1);
+			} else if (!MBvariables.heartbeat) {
+				speaker_play(51, 3);
+				speaker_state = 2;
+			} else if (!HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_10)) {
+				speaker_play(51, 2);
+				speaker_state = 2;
+			}
+		}
+		break;
+	case 1:
+		if (HAL_GetTick() > 5500) {
+			if (MBvariables.heartbeat || HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_10)) {
+				speaker_state = 2;
+			} else if (MBvariables.heartbeat) {
+				speaker_play(51, 5);
+				speaker_state = 2;
+			} else if (HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_10)) {
+				speaker_play(51, 4);
+				speaker_state = 2;
+			}
+		}
+		break;
+	case 2:
+		if(lastmodbusstate && !MBvariables.heartbeat){
+			speaker_play(51, 8);
+		}
+		break;
+	}
+
+	lastmodbusstate = MBvariables.heartbeat;
+}
+
+void speaker_UART_bitbang() {
 	if (!speaker_queue) {
 		return;
 	}

@@ -75,7 +75,7 @@ void modbus_heartbeat_handler(MB *variables) {
 				fail++;
 			}
 			// if fail is too high then system is disconnected
-			if (fail > 9) {
+			if (fail > 17) {
 				variables->heartbeat = 0;
 			}
 		}

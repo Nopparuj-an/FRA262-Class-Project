@@ -7,6 +7,8 @@
 #include "i2c.h"
 #include <Joystick.h>
 #include <LowpassFilter.h>
+#include <RGB.h>
+#include <Speaker.h>
 
 // PRIVATE TYPEDEF ================================================================================
 
@@ -72,6 +74,7 @@ void main_logic(MB *variables) {
 	RGB_logic(state, tray_point_n, emergency);
 	data_report(variables);
 	Joystick_Transmit(variables->x_target_position, setpoint_y * 0.3, jog_enable + jog_point_n);
+	speaker_logic();
 
 	emergency_handler();
 	if (emergency) {
@@ -84,6 +87,7 @@ void main_logic(MB *variables) {
 	switch (state) {
 	case MSwait:
 		if (HAL_GetTick() - wait_timer > 1500) {
+			speaker_play(51, 13);
 			state = MSidle;
 		}
 		break;
@@ -98,6 +102,7 @@ void main_logic(MB *variables) {
 			state = MSpick;
 			variables->y_moving_status = 1;
 			jog_enable = 1;
+			speaker_play(51, 9);
 		}
 
 		if (variables->base_system_status & 0b10) {
@@ -106,6 +111,7 @@ void main_logic(MB *variables) {
 			state = MSplace;
 			variables->y_moving_status = 2;
 			jog_enable = 1;
+			speaker_play(51, 9);
 		}
 
 		if (variables->base_system_status & 0b100) {
@@ -320,11 +326,13 @@ void joystick_callback() {
 	}
 
 	if (receivedByte[2]) {
+		speaker_play(51, 10 + jog_point_n);
 		corners[jog_point_n].x = setpoint_x / 10.0;
 		corners[jog_point_n].y = setpoint_y * 0.03;
 		jog_point_n++;
 	}
 	if (jog_point_n >= 3) {
+		speaker_play(51, 12);
 		if (state == MSpick) {
 			localize(corners, pick, &origin_pick, &angle_pick);
 			MBvariables.pick_tray_orientation = (360.0 - (angle_pick * 180.0 / M_PI)) * 100.0;
@@ -386,6 +394,7 @@ void emergency_handler() {
 	// going into emergency
 	if (!prev_state && emergency) {
 		ENDEFF_EMERGENCY(&hi2c1);
+		speaker_play(50, 5);
 	}
 
 	// leaving emergency
@@ -393,6 +402,7 @@ void emergency_handler() {
 		ENDEFF_EMERGENCY_QUIT(&hi2c1);
 		HAL_Delay(11);
 		ENE_I2C_UPDATE(&MBvariables.end_effector_status, &hi2c1, 1);
+		speaker_play(50, 8);
 	}
 
 	if (emergency) {

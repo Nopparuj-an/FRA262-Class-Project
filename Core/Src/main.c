@@ -154,8 +154,9 @@ int main(void) {
 	UARTInterruptConfig();
 
 	// Startup tasks
+	RGB_Bootup(1);
 	speaker_play(50, 1);
-	RGB_Bootup();
+	RGB_Bootup(2);
 
 	/* USER CODE END 2 */
 
@@ -223,7 +224,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 	if (htim == &htim9) {
 		interrupt_logic();
 	} else if (htim == &htim10) {
-		speaker_logic();
+		speaker_UART_bitbang();
 	}
 }
 
