@@ -399,6 +399,7 @@ void emergency_handler() {
 		PID_enable = 0;
 		state = MSidle;
 		voltage = 0;
+		home_status = 0;
 		MBvariables.base_system_status = 0;
 	}
 
