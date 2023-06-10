@@ -40,6 +40,7 @@
 #include <RGB.h>
 #include <Joystick.h>
 #include <MainLogic.h>
+#include <Speaker.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -143,12 +144,17 @@ int main(void) {
 	// Timer 9 Timer Interrupt (1000Hz)
 	HAL_TIM_Base_Start_IT(&htim9);
 
+	// Timer 10 Timer Interrupt (9600Hz)
+	HAL_TIM_Base_Start_IT(&htim10);
+
 	// Initialize modbus
 	modbus_init();
 
 	// Initialize UART1
 	UARTInterruptConfig();
 
+	// Startup tasks
+	speaker_play(50, 1);
 	RGB_Bootup();
 
 	/* USER CODE END 2 */
@@ -216,6 +222,8 @@ void SystemClock_Config(void) {
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 	if (htim == &htim9) {
 		interrupt_logic();
+	} else if (htim == &htim10) {
+		speaker_logic();
 	}
 }
 

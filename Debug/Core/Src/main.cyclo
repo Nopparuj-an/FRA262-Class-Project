@@ -30,9 +30,11 @@ RGB.h:97:6:RGB_Rainbow	16
 RGB.h:184:6:RGB_Bootup	2
 RGB.h:193:6:RGB_BreathingPattern	5
 RGB.h:222:6:RGB_TrayProgress	2
-main.c:97:5:main	1
-main.c:176:6:SystemClock_Config	3
-main.c:216:6:HAL_TIM_PeriodElapsedCallback	2
-main.c:222:6:HAL_UART_RxCpltCallback	2
-main.c:228:6:HAL_GPIO_EXTI_Callback	2
-main.c:241:6:Error_Handler	1
+Speaker.h:18:6:speaker_logic	6
+Speaker.h:45:6:speaker_play	2
+main.c:98:5:main	1
+main.c:182:6:SystemClock_Config	3
+main.c:222:6:HAL_TIM_PeriodElapsedCallback	3
+main.c:230:6:HAL_UART_RxCpltCallback	2
+main.c:236:6:HAL_GPIO_EXTI_Callback	2
+main.c:249:6:Error_Handler	1
