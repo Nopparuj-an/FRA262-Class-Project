@@ -130,7 +130,7 @@ int main(void) {
 	MX_TIM9_Init();
 	MX_TIM11_Init();
 	MX_TIM3_Init();
-	MX_USART6_UART_Init();
+	MX_TIM10_Init();
 	/* USER CODE BEGIN 2 */
 
 	// start timer 1 in PWM for motor
