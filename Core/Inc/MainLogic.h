@@ -234,7 +234,7 @@ void interrupt_logic() {
 		static int count = 0;
 		count++;
 		if (count >= 5) {
-			PositionControlPID(setpointtraj_y, setpoint_y, getLocalPosition(), KP, KI, KD, &voltage);
+			PositionControlPID(setpointtraj_y, setpoint_y, getLocalPosition(), KP, KI, KD, &voltage, 0);
 			count = 0;
 		}
 	}
@@ -275,10 +275,12 @@ void home_handler() {
 		return;
 	}
 	motor(0);
+	voltage = 0;
 	homeoffset = getRawPosition() + 11500;
 	setpointtraj_y = -11500;
 	setpoint_y = -11500;
 	Trajectory(setpoint_y, 34000, 80000, (int*) &setpointtraj_y, (float*) &traj_velocity, (float*) &traj_acceleration, 1);
+	PositionControlPID(setpointtraj_y, setpoint_y, getLocalPosition(), KP, KI, KD, &voltage, 1); // reset PID
 	home_status = 0;
 	PID_enable = 1;
 	state = MSwait;
@@ -396,6 +398,8 @@ void emergency_handler() {
 	if (emergency) {
 		PID_enable = 0;
 		state = MSidle;
+		voltage = 0;
+		MBvariables.base_system_status = 0;
 	}
 
 	prev_state = emergency;

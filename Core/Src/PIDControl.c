@@ -12,7 +12,7 @@
 
 // USER CODE ======================================================================================
 
-void PositionControlPID(float trajectory_setpoint, float final_setpoint, float position_now, float Kp, float Ki, float Kd, float *PID_out) {
+void PositionControlPID(float trajectory_setpoint, float final_setpoint, float position_now, float Kp, float Ki, float Kd, float *PID_out, int reset) {
 	// variable
 	static float error_first = 0;
 	static float error_second = 0;
@@ -20,6 +20,12 @@ void PositionControlPID(float trajectory_setpoint, float final_setpoint, float p
 	static float first = 0;
 	static float second = 0;
 	static float third = 0;
+
+	if(reset){
+		error_second = 0;
+		error_third = 0;
+		return;
+	}
 
 	// error position
 	error_first = trajectory_setpoint - position_now;
