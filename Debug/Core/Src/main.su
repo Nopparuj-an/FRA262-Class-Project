@@ -23,10 +23,10 @@
 ../Core/Inc/MainLogic.h:296:6:data_report	16	static
 ../Core/Inc/MainLogic.h:302:6:x_spam_position	16	static
 ../Core/Inc/MainLogic.h:308:6:joystick_callback	16	static
-../Core/Inc/MainLogic.h:352:9:move_finished	16	static
-../Core/Inc/MainLogic.h:359:6:preset_data_y_only	16	static
-../Core/Inc/MainLogic.h:366:6:preset_data_xy	8	static
-../Core/Inc/MainLogic.h:390:6:emergency_handler	8	static
+../Core/Inc/MainLogic.h:365:9:move_finished	16	static
+../Core/Inc/MainLogic.h:372:6:preset_data_y_only	16	static
+../Core/Inc/MainLogic.h:379:6:preset_data_xy	8	static
+../Core/Inc/MainLogic.h:403:6:emergency_handler	8	static
 ../Core/Inc/RGB.h:27:6:RGB_logic	16	static
 ../Core/Inc/RGB.h:91:6:RGB_off	16	static
 ../Core/Inc/RGB.h:97:6:RGB_Rainbow	80	static

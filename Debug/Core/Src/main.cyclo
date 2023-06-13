@@ -22,11 +22,11 @@ MainLogic.h:266:6:end_effector_laser	2
 MainLogic.h:276:6:home_handler	3
 MainLogic.h:296:6:data_report	1
 MainLogic.h:302:6:x_spam_position	3
-MainLogic.h:308:6:joystick_callback	9
-MainLogic.h:352:9:move_finished	3
-MainLogic.h:359:6:preset_data_y_only	2
-MainLogic.h:366:6:preset_data_xy	1
-MainLogic.h:390:6:emergency_handler	6
+MainLogic.h:308:6:joystick_callback	12
+MainLogic.h:365:9:move_finished	3
+MainLogic.h:372:6:preset_data_y_only	2
+MainLogic.h:379:6:preset_data_xy	1
+MainLogic.h:403:6:emergency_handler	6
 RGB.h:27:6:RGB_logic	12
 RGB.h:91:6:RGB_off	2
 RGB.h:97:6:RGB_Rainbow	16

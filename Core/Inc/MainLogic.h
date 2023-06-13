@@ -307,7 +307,20 @@ void x_spam_position(MB *variables) {
 
 void joystick_callback() {
 	if (!jog_enable) {
+		if (receivedByte[2]) {
+			state = MStestXY;
+			speaker_play(50, 12);
+		}
+		if (receivedByte[3]) {
+			state = MSidle;
+			speaker_play(50, 12);
+		}
 		return;
+	}
+
+	if (receivedByte[3]) {
+		state = MSidle;
+		speaker_play(50, 12);
 	}
 
 	setpoint_x += receivedByte[0];
@@ -364,23 +377,23 @@ void preset_data_y_only() {
 }
 
 void preset_data_xy() {
-	corners[0].x = 7.1;
-	corners[0].y = -68.0;
-	corners[1].x = 52.7;
-	corners[1].y = -29.4;
-	corners[2].x = 21.2;
-	corners[2].y = 8.2;
+	corners[0].x = 79;
+	corners[0].y = -297.9;
+	corners[1].x = 30;
+	corners[1].y = -278.4;
+	corners[2].x = 103;
+	corners[2].y = -242.7;
 	localize(corners, pick, &origin_pick, &angle_pick);
 	MBvariables.pick_tray_orientation = (360.0 - (angle_pick * 180.0 / M_PI)) * 100.0;
 	MBvariables.pick_tray_origin_x = origin_pick.x * 10;
 	MBvariables.pick_tray_origin_y = origin_pick.y * 10;
 
-	corners[0].x = -90.3;
-	corners[0].y = -170.0;
-	corners[1].x = -46.1;
-	corners[1].y = -149.4;
-	corners[2].x = -69.6;
-	corners[2].y = -95.3;
+	corners[0].x = -90;
+	corners[0].y = 228.6;
+	corners[1].x = -45;
+	corners[1].y = 247.2;
+	corners[2].x = -69;
+	corners[2].y = 302.4;
 	localize(corners, place, &origin_place, &angle_place);
 	MBvariables.place_tray_orientation = (360.0 - (angle_place * 180.0 / M_PI)) * 100.0;
 	MBvariables.place_tray_origin_x = origin_place.x * 10;
