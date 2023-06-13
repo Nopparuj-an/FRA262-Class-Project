@@ -12,9 +12,9 @@
 ../Core/Inc/WS2812B.h:31:6:Set_Brightness	40	static
 ../Core/Inc/WS2812B.h:47:6:WS2812_Send	32	static
 ../Core/Inc/WS2812B.h:81:6:HAL_TIM_PWM_PulseFinishedCallback	16	static
-../Core/Inc/Speaker.h:23:6:speaker_logic	8	static
-../Core/Inc/Speaker.h:62:6:speaker_UART_bitbang	8	static
-../Core/Inc/Speaker.h:89:6:speaker_play	16	static
+../Core/Inc/Speaker.h:22:6:speaker_logic	8	static
+../Core/Inc/Speaker.h:29:6:speaker_UART_bitbang	8	static
+../Core/Inc/Speaker.h:56:6:speaker_play	16	static
 ../Core/Inc/MainLogic.h:72:6:main_logic	24	static
 ../Core/Inc/MainLogic.h:232:6:interrupt_logic	16	static
 ../Core/Inc/MainLogic.h:252:6:end_effector_gripper	16	static
