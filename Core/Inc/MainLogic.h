@@ -161,6 +161,7 @@ void main_logic(MB *variables) {
 		switch (tray_wait_mode) {
 		case 0:
 			// move to pick
+			variables->end_effector_status = 2;
 			variables->y_moving_status = 8;
 			setpoint_x = pick[tray_point_n].x * 10;
 			setpoint_y = pick[tray_point_n].y / 0.03;
@@ -207,6 +208,7 @@ void main_logic(MB *variables) {
 			variables->x_target_position = 0;
 			variables->x_moving_status = 2;
 			state = MSidle;
+			variables->end_effector_status = 2;
 		}
 		break;
 	case MSpoint:
@@ -420,6 +422,7 @@ void emergency_handler() {
 		HAL_Delay(11);
 		ENE_I2C_UPDATE(&MBvariables.end_effector_status, &hi2c1, 1);
 		speaker_play(50, 8);
+		state = MShome;
 	}
 
 	if (emergency) {
