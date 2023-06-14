@@ -40,6 +40,7 @@
 #include <RGB.h>
 #include <Joystick.h>
 #include <MainLogic.h>
+#include <Speaker.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -74,8 +75,6 @@ MB MBvariables = { 0 };
 uint32_t modbus_count = 0;
 
 int receivedByte[4] = { 0 };
-
-uint32_t interrupt_count;
 
 /* USER CODE END PV */
 
@@ -130,7 +129,7 @@ int main(void) {
 	MX_TIM9_Init();
 	MX_TIM11_Init();
 	MX_TIM3_Init();
-	MX_USART6_UART_Init();
+	MX_TIM10_Init();
 	/* USER CODE BEGIN 2 */
 
 	// start timer 1 in PWM for motor
@@ -143,20 +142,25 @@ int main(void) {
 	// Timer 9 Timer Interrupt (1000Hz)
 	HAL_TIM_Base_Start_IT(&htim9);
 
+	// Timer 10 Timer Interrupt (9600Hz)
+	HAL_TIM_Base_Start_IT(&htim10);
+
 	// Initialize modbus
 	modbus_init();
 
 	// Initialize UART1
 	UARTInterruptConfig();
 
-	RGB_Bootup();
+	// Startup tasks
+	RGB_Bootup(1);
+	speaker_play(50, 1);
+	RGB_Bootup(2);
 
 	/* USER CODE END 2 */
 
 	/* Infinite loop */
 	/* USER CODE BEGIN WHILE */
 	while (1) {
-		Modbus_Protocal_Worker();
 		modbus_heartbeat_handler(&MBvariables);
 		modbus_data_sync(&MBvariables);
 		QEIReadHome = getLocalPosition();
@@ -216,19 +220,14 @@ void SystemClock_Config(void) {
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 	if (htim == &htim9) {
 		interrupt_logic();
+	} else if (htim == &htim10) {
+		speaker_UART_bitbang();
 	}
 }
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 	if (huart == &huart1) {
 		Joystick_Received((int*) &receivedByte);
-	}
-}
-
-void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
-	if (GPIO_Pin == GPIO_PIN_3) {
-		home_handler();
-		interrupt_count++;
 	}
 }
 

@@ -7,6 +7,8 @@
 #include "i2c.h"
 #include <Joystick.h>
 #include <LowpassFilter.h>
+#include <RGB.h>
+#include <Speaker.h>
 
 // PRIVATE TYPEDEF ================================================================================
 
@@ -72,6 +74,7 @@ void main_logic(MB *variables) {
 	RGB_logic(state, tray_point_n, emergency);
 	data_report(variables);
 	Joystick_Transmit(variables->x_target_position, setpoint_y * 0.3, jog_enable + jog_point_n);
+	speaker_logic();
 
 	emergency_handler();
 	if (emergency) {
@@ -84,6 +87,7 @@ void main_logic(MB *variables) {
 	switch (state) {
 	case MSwait:
 		if (HAL_GetTick() - wait_timer > 1500) {
+			speaker_play(51, 13);
 			state = MSidle;
 		}
 		break;
@@ -98,6 +102,7 @@ void main_logic(MB *variables) {
 			state = MSpick;
 			variables->y_moving_status = 1;
 			jog_enable = 1;
+			speaker_play(51, 9);
 		}
 
 		if (variables->base_system_status & 0b10) {
@@ -106,6 +111,7 @@ void main_logic(MB *variables) {
 			state = MSplace;
 			variables->y_moving_status = 2;
 			jog_enable = 1;
+			speaker_play(51, 9);
 		}
 
 		if (variables->base_system_status & 0b100) {
@@ -155,6 +161,7 @@ void main_logic(MB *variables) {
 		switch (tray_wait_mode) {
 		case 0:
 			// move to pick
+			variables->end_effector_status = 2;
 			variables->y_moving_status = 8;
 			setpoint_x = pick[tray_point_n].x * 10;
 			setpoint_y = pick[tray_point_n].y / 0.03;
@@ -201,6 +208,7 @@ void main_logic(MB *variables) {
 			variables->x_target_position = 0;
 			variables->x_moving_status = 2;
 			state = MSidle;
+			variables->end_effector_status = 2;
 		}
 		break;
 	case MSpoint:
@@ -241,6 +249,10 @@ void interrupt_logic() {
 
 	// Call motor function
 	motor(voltage);
+
+	Modbus_Protocal_Worker();
+
+	home_handler();
 }
 
 void end_effector_gripper(MB *variables, uint8_t mode) {
@@ -301,7 +313,20 @@ void x_spam_position(MB *variables) {
 
 void joystick_callback() {
 	if (!jog_enable) {
+		if (receivedByte[2]) {
+			state = MStestXY;
+			speaker_play(50, 12);
+		}
+		if (receivedByte[3]) {
+			state = MSidle;
+			speaker_play(50, 12);
+		}
 		return;
+	}
+
+	if (receivedByte[3]) {
+		state = MSidle;
+		speaker_play(50, 12);
 	}
 
 	setpoint_x += receivedByte[0];
@@ -320,11 +345,13 @@ void joystick_callback() {
 	}
 
 	if (receivedByte[2]) {
+		speaker_play(51, 10 + jog_point_n);
 		corners[jog_point_n].x = setpoint_x / 10.0;
 		corners[jog_point_n].y = setpoint_y * 0.03;
 		jog_point_n++;
 	}
 	if (jog_point_n >= 3) {
+		speaker_play(51, 12);
 		if (state == MSpick) {
 			localize(corners, pick, &origin_pick, &angle_pick);
 			MBvariables.pick_tray_orientation = (360.0 - (angle_pick * 180.0 / M_PI)) * 100.0;
@@ -356,23 +383,23 @@ void preset_data_y_only() {
 }
 
 void preset_data_xy() {
-	corners[0].x = 7.1;
-	corners[0].y = -68.0;
-	corners[1].x = 52.7;
-	corners[1].y = -29.4;
-	corners[2].x = 21.2;
-	corners[2].y = 8.2;
+	corners[0].x = 79;
+	corners[0].y = -297.9;
+	corners[1].x = 30;
+	corners[1].y = -278.4;
+	corners[2].x = 103;
+	corners[2].y = -242.7;
 	localize(corners, pick, &origin_pick, &angle_pick);
 	MBvariables.pick_tray_orientation = (360.0 - (angle_pick * 180.0 / M_PI)) * 100.0;
 	MBvariables.pick_tray_origin_x = origin_pick.x * 10;
 	MBvariables.pick_tray_origin_y = origin_pick.y * 10;
 
-	corners[0].x = -90.3;
-	corners[0].y = -170.0;
-	corners[1].x = -46.1;
-	corners[1].y = -149.4;
-	corners[2].x = -69.6;
-	corners[2].y = -95.3;
+	corners[0].x = -90;
+	corners[0].y = 228.6;
+	corners[1].x = -45;
+	corners[1].y = 247.2;
+	corners[2].x = -69;
+	corners[2].y = 302.4;
 	localize(corners, place, &origin_place, &angle_place);
 	MBvariables.place_tray_orientation = (360.0 - (angle_place * 180.0 / M_PI)) * 100.0;
 	MBvariables.place_tray_origin_x = origin_place.x * 10;
@@ -386,6 +413,7 @@ void emergency_handler() {
 	// going into emergency
 	if (!prev_state && emergency) {
 		ENDEFF_EMERGENCY(&hi2c1);
+		speaker_play(50, 5);
 	}
 
 	// leaving emergency
@@ -393,6 +421,8 @@ void emergency_handler() {
 		ENDEFF_EMERGENCY_QUIT(&hi2c1);
 		HAL_Delay(11);
 		ENE_I2C_UPDATE(&MBvariables.end_effector_status, &hi2c1, 1);
+		speaker_play(50, 8);
+		state = MShome;
 	}
 
 	if (emergency) {

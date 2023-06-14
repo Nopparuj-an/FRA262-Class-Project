@@ -80,6 +80,7 @@ void ENDEFF_GRIPPER_PICK(I2C_HandleTypeDef *hi2c) {
 	static uint8_t data[2] = { 0x10, 0x5A };
 	if (HAL_GetTick() - timestamp >= 2000) {
 		HAL_I2C_Master_Transmit(hi2c, SLAVE_ADDR, data, 2, HAL_MAX_DELAY);
+//		speaker_play(51, 6);
 		timestamp = HAL_GetTick();
 		complete = 1;
 		return;
@@ -89,6 +90,7 @@ void ENDEFF_GRIPPER_PLACE(I2C_HandleTypeDef *hi2c) {
 	static uint8_t data[2] = { 0x10, 0x69 };
 	if (HAL_GetTick() - timestamp >= 2000) {
 		HAL_I2C_Master_Transmit(hi2c, SLAVE_ADDR, data, 2, HAL_MAX_DELAY);
+//		speaker_play(51, 7);
 		timestamp = HAL_GetTick();
 		complete = 1;
 		return;

@@ -13,7 +13,7 @@ void RGB_logic(MachineState state, uint8_t point, uint8_t emergency);
 void RGB_off();
 void RGB_Rainbow(uint8_t dobreathing);
 void RGB_Power_Status();
-void RGB_Bootup();
+void RGB_Bootup(uint8_t part);
 void RGB_BreathingPattern(uint32_t period, uint8_t R, uint8_t G, uint8_t B);
 void RGB_TrayProgress(uint8_t point);
 
@@ -181,12 +181,21 @@ void RGB_Rainbow(uint8_t dobreathing) {
 	}
 }
 
-void RGB_Bootup(void) {
-	for (int i = 0; i < 60; i++) {
-		Set_LED(i, 255, 0, 0);
-		HAL_Delay(10);
-		Set_Brightness(45);
-		WS2812_Send();
+void RGB_Bootup(uint8_t part) {
+	if (part == 1) {
+		for (int i = 0; i < 30; i++) {
+			Set_LED(i, 255, 0, 0);
+			HAL_Delay(10);
+			Set_Brightness(45);
+			WS2812_Send();
+		}
+	} else {
+		for (int i = 30; i < 60; i++) {
+			Set_LED(i, 255, 0, 0);
+			HAL_Delay(10);
+			Set_Brightness(45);
+			WS2812_Send();
+		}
 	}
 }
 
