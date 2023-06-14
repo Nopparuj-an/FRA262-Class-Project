@@ -163,7 +163,6 @@ int main(void) {
 	/* Infinite loop */
 	/* USER CODE BEGIN WHILE */
 	while (1) {
-		Modbus_Protocal_Worker();
 		modbus_heartbeat_handler(&MBvariables);
 		modbus_data_sync(&MBvariables);
 		QEIReadHome = getLocalPosition();

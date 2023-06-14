@@ -247,6 +247,8 @@ void interrupt_logic() {
 
 	// Call motor function
 	motor(voltage);
+
+	Modbus_Protocal_Worker();
 }
 
 void end_effector_gripper(MB *variables, uint8_t mode) {
